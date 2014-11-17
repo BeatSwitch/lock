@@ -1,0 +1,4 @@
+suites:
+    default:
+        namespace: BeatSwitch\Lock
+        psr4_prefix: BeatSwitch\Lock
