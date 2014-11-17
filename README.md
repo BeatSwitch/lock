@@ -24,7 +24,7 @@ Lock is a flexible, driver based **Acl** package for **PHP 5.4+**.
     - [Implementing the Caller contract](#implementing-the-caller-contract)
     - [Working with a static driver](#working-with-a-static-driver)
     - [Working with a persistent driver](#working-with-a-persistent-driver)
-    - [Setting a God caller](#settings-a-god-caller)
+    - [Setting a God caller](#setting-a-god-caller)
 - [Api](#api)
 - [Building a Driver](#building-a-driver)
 - [Maintainer](#maintainer)
