@@ -113,7 +113,7 @@ class Organization implements Caller
         return 'organizations';
     }
 
-    public function getCallerType()
+    public function getCallerId()
     {
         return $this->id;
     }
