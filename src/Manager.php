@@ -27,6 +27,6 @@ class Manager
      */
     public function caller(Caller $caller)
     {
-        return new Lock($caller, $this->driver);
+        return LockFactory::make($caller, $this->driver);
     }
 }

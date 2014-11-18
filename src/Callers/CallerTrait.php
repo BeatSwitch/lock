@@ -1,14 +1,15 @@
 <?php
 namespace BeatSwitch\Lock\Callers;
 
-use BeatSwitch\Lock\Contracts\Driver;
+use BeatSwitch\Lock\Exceptions\InvalidLockCaller;
 use BeatSwitch\Lock\Exceptions\LockInstanceNotSet;
 use BeatSwitch\Lock\Lock;
+use BeatSwitch\Lock\Manager;
 
 /**
  * This trait can be used on objects which extend the Caller contract. After
- * initializing the Lock instance with the initLockInstance method, the caller
- * receives the ability to call the public api from the lock instance onto itself.
+ * setting the Lock instance with the setLock method, the caller receives
+ * the ability to call the public api from the lock instance onto itself.
  */
 trait CallerTrait
 {
@@ -92,11 +93,13 @@ trait CallerTrait
     }
 
     /**
-     * @param \BeatSwitch\Lock\Contracts\Driver $driver
+     * Sets the lock instance for this caller
+     *
+     * @param \BeatSwitch\Lock\Manager $manager
      */
-    public function initLockInstance(Driver $driver)
+    public function setLock(Manager $manager)
     {
-        $this->lock = new Lock($this, $driver);
+        $this->lock = $manager->caller($this);
     }
 
     /**
@@ -108,7 +111,7 @@ trait CallerTrait
     {
         if (! $this->lock instanceof Lock) {
             throw new LockInstanceNotSet(
-                'Please set a valid lock instance on this class before attempting to use it'
+                'Please set a valid lock instance on this class before attempting to use it.'
             );
         }
     }

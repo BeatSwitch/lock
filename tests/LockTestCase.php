@@ -1,14 +1,20 @@
 <?php
 namespace BeatSwitch\Lock\Tests;
 
-use BeatSwitch\Lock\Contracts\Caller;
-use BeatSwitch\Lock\Contracts\Driver;
 use BeatSwitch\Lock\Lock;
+use BeatSwitch\Lock\Manager;
 use BeatSwitch\Lock\Tests\Stubs\Event;
 use BeatSwitch\Lock\Tests\Stubs\User;
 
 abstract class LockTestCase extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * The main Lock instance
+     *
+     * @var \BeatSwitch\Lock\Manager
+     */
+    protected $manager;
+
     /**
      * The main Lock instance
      *
@@ -34,23 +40,31 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->caller = new User(1);
-        $this->caller->initLockInstance($this->driver);
+        // Init the lock manager.
+        $this->manager = new Manager($this->driver);
 
-        $this->lock = $this->makeLock($this->caller, $this->driver);
+        // Init the caller.
+        $caller = new User(1);
+
+        // Create the lock instance.
+        $lock = $this->manager->caller($caller);
+
+        // Configure the lock instance.
+        $this->lock = $this->configureLock($lock);
+
+        // Set the Lock instance on the caller to init the trait functionality.
+        $caller->setLock($this->manager);
+        $this->caller = $caller;
     }
 
     /**
      * The configuration with tests which all driver tests should use
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @param \BeatSwitch\Lock\Contracts\Driver $driver
+     * @param \BeatSwitch\Lock\Lock $lock
      * @return \BeatSwitch\Lock\Lock
      */
-    final protected function makeLock(Caller $caller = null, Driver $driver = null)
+    final protected function configureLock(Lock $lock)
     {
-        $lock = new Lock($caller, $driver);
-
         // Allow to create everything.
         $lock->allow('create');
 
