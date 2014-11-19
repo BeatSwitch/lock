@@ -196,7 +196,7 @@ $lock = new Lock($caller, new ArrayDriver());
 $lock->allow('all');
 ```
 
-Now every "can" method call will validate to true.
+Now every "can" method call will validate to true for this caller.
 
 ## Api
 
