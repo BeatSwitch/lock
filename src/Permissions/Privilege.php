@@ -4,7 +4,7 @@ namespace BeatSwitch\Lock\Permissions;
 /**
  * A privilege is placed when you allow a caller something
  */
-class Privilege extends AbstractPermission
+class Privilege extends Permission
 {
     /** @var string */
     const TYPE = 'privilege';

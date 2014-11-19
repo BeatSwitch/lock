@@ -4,7 +4,7 @@ namespace BeatSwitch\Lock\Permissions;
 /**
  * A restriction is placed when you deny a caller something
  */
-class Restriction extends AbstractPermission
+class Restriction extends Permission
 {
     /** @var string */
     const TYPE = 'restriction';
