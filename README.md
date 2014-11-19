@@ -230,7 +230,7 @@ You can easily build a driver by implementing the `BeatSwitch\Lock\Contracts\Dri
 - `caller_id` (int, 11)
 - `type` (varchar, 10)
 - `action` (varchar, 100)
-- `resource` (varchar, 100)
+- `resource_type` (varchar, 100)
 - `resource_id` (int, 11)
 
 Let's check out a full implementation of the driver below. Notice that for the `getPermissions` method we're using the `PermissionFactory` class to easily map the data and create `Permission` objects from them.
@@ -273,7 +273,7 @@ class EloquentDriver implements Driver
         $permission->caller_id = $caller->getCallerId();
         $permission->type = $permission->getType();
         $permission->action = $permission->getAction();
-        $permission->resource = $permission->getResource();
+        $permission->resource_type = $permission->getResource();
         $permission->resource_id = $permission->getResourceId();
         $permission->save();
     }
@@ -291,7 +291,7 @@ class EloquentDriver implements Driver
             ->where('caller_id', $caller->getCallerId())
             ->where('type', $permission->getType())
             ->where('action', $permission->getAction())
-            ->where('resource', $permission->getResource())
+            ->where('resource_type', $permission->getResource())
             ->where('resource_id', $permission->getResourceId())
             ->delete();
     }
@@ -309,7 +309,7 @@ class EloquentDriver implements Driver
             ->where('caller_id', $caller->getCallerId())
             ->where('type', $permission->getType())
             ->where('action', $permission->getAction())
-            ->where('resource', $permission->getResource())
+            ->where('resource_type', $permission->getResource())
             ->where('resource_id', $permission->getResourceId())
             ->first();
     }
