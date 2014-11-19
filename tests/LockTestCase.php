@@ -87,6 +87,9 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         // Allow to edit this specific event with an ID of 1.
         $lock->allow('update', new Event(1));
 
+        // Set multiple actions at once.
+        $lock->allow(['create', 'delete'], 'comments');
+
         return $lock;
     }
 
@@ -177,13 +180,29 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->lock->can('update', $event));
     }
 
+    final function it_can_check_multiple_permissions_at_once()
+    {
+        $this->assertTrue($this->lock->can(['create', 'delete'], 'comments'));
+        $this->assertTrue($this->lock->cannot(['create', 'edit'], 'comments'));
+    }
+
     /** @test */
     final function it_can_toggle_permissions()
     {
         $this->lock->toggle('edit', 'events');
         $this->assertTrue($this->lock->can('edit', 'events'));
+
         $this->lock->toggle('edit', 'events');
         $this->assertFalse($this->lock->can('edit', 'events'));
+    }
+
+    final function it_can_toggle_multiple_permissions_at_once()
+    {
+        $this->lock->toggle(['create', 'delete'], 'comments');
+        $this->assertFalse($this->lock->can(['create', 'delete'], 'users'));
+
+        $this->lock->toggle(['create', 'delete'], 'comments');
+        $this->assertTrue($this->lock->can(['create', 'delete'], 'users'));
     }
 
     /** @test */

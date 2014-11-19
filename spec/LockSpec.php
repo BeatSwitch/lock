@@ -18,7 +18,7 @@ class LockSpec extends ObjectBehavior
         $this->shouldHaveType('BeatSwitch\Lock\Lock');
     }
 
-    function it_can_handle_a_single_action_permission()
+    function it_can_handle_a_single_action()
     {
         $this->allow('edit');
 
@@ -28,7 +28,15 @@ class LockSpec extends ObjectBehavior
         $this->can('edit', 'users', 1)->shouldReturn(true);
     }
 
-    function it_can_handle_resource_type_permissions()
+    function it_can_handle_multiple_actions()
+    {
+        $this->allow(['create', 'edit']);
+
+        $this->can('create')->shouldReturn(true);
+        $this->can('edit')->shouldReturn(true);
+    }
+
+    function it_can_handle_a_resource_type()
     {
         $this->allow('edit', 'users');
 
@@ -38,7 +46,18 @@ class LockSpec extends ObjectBehavior
         $this->can('edit', 'users', 1)->shouldReturn(true);
     }
 
-    function it_can_handle_specific_resource_permissions()
+    function it_can_handle_multiple_actions_on_a_resource_type()
+    {
+        $this->allow(['create', 'edit'], 'users');
+
+        $this->can('create')->shouldReturn(false);
+        $this->can('edit')->shouldReturn(false);
+        $this->can('create', 'users')->shouldReturn(true);
+        $this->can('edit', 'users')->shouldReturn(true);
+        $this->can('update', 'users')->shouldReturn(false);
+    }
+
+    function it_can_handle_a_specific_resource()
     {
         $this->allow('edit', 'users', 5);
 
@@ -49,7 +68,19 @@ class LockSpec extends ObjectBehavior
         $this->can('edit', 'users', 5)->shouldReturn(true);
     }
 
-    function it_can_handle_all_permissions()
+    function it_can_handle_multiple_actions_on_a_specific_resource()
+    {
+        $this->allow(['create', 'edit'], 'users', 1);
+
+        $this->can('create')->shouldReturn(false);
+        $this->can('edit')->shouldReturn(false);
+        $this->can('create', 'users')->shouldReturn(false);
+        $this->can('create', 'users', 1)->shouldReturn(true);
+        $this->can('edit', 'users',  1)->shouldReturn(true);
+        $this->can('update', 'users',  1)->shouldReturn(false);
+    }
+
+    function it_can_handle_a_wildcard()
     {
         $this->allow('all');
 
@@ -81,12 +112,30 @@ class LockSpec extends ObjectBehavior
         $this->can('edit', 'events', 1)->shouldReturn(false);
     }
 
+    function it_can_check_multiple_actions_at_once()
+    {
+        $this->allow(['create', 'edit']);
+
+        $this->can(['create', 'edit'])->shouldReturn(true);
+        $this->can(['create', 'delete'])->shouldReturn(false);
+    }
+
     function it_can_toggle_permissions()
     {
         $this->toggle('edit', 'users');
         $this->can('edit', 'users')->shouldReturn(true);
+
         $this->toggle('edit', 'users');
         $this->can('edit', 'users')->shouldReturn(false);
+    }
+
+    function it_can_toggle_multiple_actions_at_once()
+    {
+        $this->toggle(['create', 'edit'], 'users');
+        $this->can(['create', 'edit'], 'users')->shouldReturn(true);
+
+        $this->toggle('edit', 'users');
+        $this->can(['create', 'edit'], 'users')->shouldReturn(false);
     }
 
     function it_always_returns_false_when_it_is_a_nullcaller()

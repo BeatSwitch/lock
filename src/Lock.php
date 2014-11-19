@@ -30,6 +30,100 @@ class Lock
     }
 
     /**
+     * Determine if one or more actions are allowed
+     *
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param int $resourceId
+     * @return bool
+     */
+    public function can($action, $resource = null, $resourceId = null)
+    {
+        $actions = (array) $action;
+
+        foreach ($actions as $action) {
+            if (! $this->isAllowed($action, $resource, $resourceId)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Determine if an action isn't allowed
+     *
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param int $resourceId
+     * @return bool
+     */
+    public function cannot($action, $resource = null, $resourceId = null)
+    {
+        return ! $this->can($action, $resource, $resourceId);
+    }
+
+    /**
+     * Adds a permission for a caller
+     *
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param int $resourceId
+     */
+    public function allow($action, $resource = null, $resourceId = null)
+    {
+        $actions = (array) $action;
+
+        foreach ($actions as $action) {
+            $restriction = new Restriction($action, $resource, $resourceId);
+
+            if ($this->hasPermission($restriction)) {
+                $this->removePermission($restriction);
+            }
+
+            $this->storePermission(new Privilege($action, $resource, $resourceId));
+        }
+    }
+
+    /**
+     * Removes a permission from a caller
+     *
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param int $resourceId
+     */
+    public function deny($action, $resource = null, $resourceId = null)
+    {
+        $actions = (array) $action;
+
+        foreach ($actions as $action) {
+            $privilege = new Privilege($action, $resource, $resourceId);
+
+            if ($this->hasPermission($privilege)) {
+                $this->removePermission($privilege);
+            }
+
+            $this->storePermission(new Restriction($action, $resource, $resourceId));
+        }
+    }
+
+    /**
+     * Change the value for a permission
+     *
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param int $resourceId
+     */
+    public function toggle($action, $resource = null, $resourceId = null)
+    {
+        if ($this->can($action, $resource, $resourceId)) {
+            $this->deny($action, $resource, $resourceId);
+        } else {
+            $this->allow($action, $resource, $resourceId);
+        }
+    }
+
+    /**
      * Determine if an action is allowed
      *
      * @param string $action
@@ -37,7 +131,7 @@ class Lock
      * @param int $resourceId
      * @return bool
      */
-    public function can($action, $resource = null, $resourceId = null)
+    protected function isAllowed($action, $resource, $resourceId)
     {
         $permissions = $this->getPermissions();
 
@@ -47,8 +141,8 @@ class Lock
             // Check if the restriction is valid.
             if (
                 $permission instanceof Restriction &&
-                $permission->matchesPermission(new Restriction($action, $resource, $resourceId)) &&
-                ! $permission->isAllowed($action, $resource, $resourceId)
+                $permission->matchesPermission(new Restriction($action, $resource, $resourceId))
+                && ! $permission->isAllowed($action, $resource, $resourceId)
             ) {
                 // If we've found a matching restriction, set the flag to false.
                 return false;
@@ -65,71 +159,6 @@ class Lock
         }
 
         return false;
-    }
-
-    /**
-     * Determine if an action isn't allowed
-     *
-     * @param string $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
-     * @param int $resourceId
-     * @return bool
-     */
-    public function cannot($action, $resource = null, $resourceId = null)
-    {
-        return ! $this->can($action, $resource, $resourceId);
-    }
-
-    /**
-     * Adds a permission for a caller
-     *
-     * @param string $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
-     * @param int $resourceId
-     */
-    public function allow($action, $resource = null, $resourceId = null)
-    {
-        $restriction = new Restriction($action, $resource, $resourceId);
-
-        if ($this->hasPermission($restriction)) {
-            $this->removePermission($restriction);
-        }
-
-        $this->storePermission(new Privilege($action, $resource, $resourceId));
-    }
-
-    /**
-     * Removes a permission from a caller
-     *
-     * @param string $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
-     * @param int $resourceId
-     */
-    public function deny($action, $resource = null, $resourceId = null)
-    {
-        $privilege = new Privilege($action, $resource, $resourceId);
-
-        if ($this->hasPermission($privilege)) {
-            $this->removePermission($privilege);
-        }
-
-        $this->storePermission(new Restriction($action, $resource, $resourceId));
-    }
-
-    /**
-     * Change the value for a permission
-     *
-     * @param string $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
-     * @param int $resourceId
-     */
-    public function toggle($action, $resource = null, $resourceId = null)
-    {
-        if ($this->can($action, $resource, $resourceId)) {
-            $this->deny($action, $resource, $resourceId);
-        } else {
-            $this->allow($action, $resource, $resourceId);
-        }
     }
 
     /**
