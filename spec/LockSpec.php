@@ -138,6 +138,20 @@ class LockSpec extends ObjectBehavior
         $this->can(['create', 'edit'], 'users')->shouldReturn(false);
     }
 
+    function it_can_set_action_aliases()
+    {
+        $this->alias('manage', ['create', 'read', 'update', 'delete']);
+        $this->allow('manage', 'posts');
+
+        $this->can('create')->shouldReturn(false);
+        $this->can('manage')->shouldReturn(false);
+        $this->can('manage', 'posts')->shouldReturn(true);
+        $this->can('manage', 'posts', 1)->shouldReturn(true);
+        $this->can('manage', 'events')->shouldReturn(false);
+        $this->can('create', 'posts')->shouldReturn(true);
+        $this->can(['read', 'update'], 'posts')->shouldReturn(true);
+    }
+
     function it_always_returns_false_when_it_is_a_nullcaller()
     {
         $this->beConstructedWith(new NullCaller(), new ArrayDriver());

@@ -25,6 +25,7 @@ Lock is a flexible, driver based **Acl** package for **PHP 5.4+**.
     - [Working with a static driver](#working-with-a-static-driver)
     - [Working with a persistent driver](#working-with-a-persistent-driver)
     - [Setting and checking permissions](#setting-and-checking-permissions)
+    - [Setting An Action Alias](#setting-an-action-alias)
     - [Setting a God caller](#setting-a-god-caller)
 - [Api](#api)
 - [Building a Driver](#building-a-driver)
@@ -241,6 +242,20 @@ $lock->allow(['create', 'edit'], 'posts');
 $lock->can('create', 'posts'); // true
 $lock->can(['create', 'edit'], 'posts'); // true
 $lock->can(['create', 'delete'], 'posts'); // false
+```
+
+### Setting An Action Alias
+
+To group multiple actions and set them all at once you might want to set an action alias.
+
+```php
+$lock->alias('manage', ['create', 'read', 'delete']);
+$lock->allow('manage', 'posts');
+
+$lock->can('manage', 'posts'); // true
+$lock->can('create', 'posts'); // true
+$lock->can('delete', 'posts', 1); // true
+$lock->can('update', 'posts'); // false
 ```
 
 ### Setting a God caller

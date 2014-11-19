@@ -20,6 +20,13 @@ class Lock
     protected $driver;
 
     /**
+     * Action aliases
+     *
+     * @var \BeatSwitch\Lock\ActionAlias[]
+     */
+    protected $aliases = [];
+
+    /**
      * @param \BeatSwitch\Lock\Contracts\Caller $caller
      * @param \BeatSwitch\Lock\Contracts\Driver $driver
      */
@@ -42,6 +49,12 @@ class Lock
         $actions = (array) $action;
 
         foreach ($actions as $action) {
+            if ($aliases = $this->getAliasesForAction($action)) {
+                if ($this->can($aliases, $resource, $resourceId)) {
+                    return true;
+                }
+            }
+
             if (! $this->isAllowed($action, $resource, $resourceId)) {
                 return false;
             }
@@ -121,6 +134,17 @@ class Lock
         } else {
             $this->allow($action, $resource, $resourceId);
         }
+    }
+
+    /**
+     * Register an alias to group certain actions
+     *
+     * @param string $name
+     * @param string|array $actions
+     */
+    public function alias($name, $actions)
+    {
+        $this->aliases[$name] = new Actionalias($name, $actions);
     }
 
     /**
@@ -222,6 +246,25 @@ class Lock
     protected function hasAnExistingCaller()
     {
         return $this->caller->getCallerType() !== null && $this->caller->getCallerId() !== null;
+    }
+
+    /**
+     * Returns all aliases which contain the given action
+     *
+     * @param string $action
+     * @return array
+     */
+    public function getAliasesForAction($action)
+    {
+        $actions = [];
+
+        foreach ($this->aliases as $aliasName => $alias) {
+            if ($alias->hasAction($action)) {
+                $actions[] = $aliasName;
+            }
+        }
+
+        return $actions;
     }
 
     /**

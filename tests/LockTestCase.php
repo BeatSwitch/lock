@@ -65,6 +65,9 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
      */
     final protected function configureLock(Lock $lock)
     {
+        // Add an action alias.
+        $lock->alias('manage', ['create', 'read', 'update', 'delete']);
+
         // Allow to create everything.
         $lock->allow('create');
 
@@ -89,6 +92,9 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
 
         // Set multiple actions at once.
         $lock->allow(['create', 'delete'], 'comments');
+
+        // Allow to manage accounts.
+        $lock->allow('manage', 'accounts');
 
         return $lock;
     }
@@ -221,5 +227,16 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
 
         $this->caller->toggle('update');
         $this->assertTrue($this->caller->can('update'));
+    }
+
+    /** @test */
+    final function it_can_check_actions_from_aliases()
+    {
+        $this->assertFalse($this->lock->can('manage'));
+        $this->assertTrue($this->lock->can('manage', 'accounts'));
+        $this->assertTrue($this->lock->can('manage', 'accounts', 1));
+        $this->assertFalse($this->lock->can('manage', 'events'));
+        $this->assertTrue($this->lock->can('read', 'accounts'));
+        $this->assertTrue($this->lock->can(['read', 'update'], 'accounts'));
     }
 }
