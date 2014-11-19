@@ -61,7 +61,6 @@ If you need a framework-specific implementation, pick one of the already prepare
 
 ## Roadmap
 
-- Action Aliases
 - Permission Conditions
 - Roles
 - Group Permissions
