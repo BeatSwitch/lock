@@ -180,6 +180,7 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->lock->can('update', $event));
     }
 
+    /** @test */
     final function it_can_check_multiple_permissions_at_once()
     {
         $this->assertTrue($this->lock->can(['create', 'delete'], 'comments'));
@@ -196,13 +197,14 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->lock->can('edit', 'events'));
     }
 
+    /** @test */
     final function it_can_toggle_multiple_permissions_at_once()
     {
         $this->lock->toggle(['create', 'delete'], 'comments');
-        $this->assertFalse($this->lock->can(['create', 'delete'], 'users'));
+        $this->assertFalse($this->lock->can(['create', 'delete'], 'comments'));
 
         $this->lock->toggle(['create', 'delete'], 'comments');
-        $this->assertTrue($this->lock->can(['create', 'delete'], 'users'));
+        $this->assertTrue($this->lock->can(['create', 'delete'], 'comments'));
     }
 
     /** @test */
