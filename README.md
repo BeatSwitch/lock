@@ -242,6 +242,7 @@ use Permission;
 use BeatSwitch\Lock\Contracts\Caller;
 use BeatSwitch\Lock\Contracts\Driver;
 use BeatSwitch\Lock\Contracts\Permission as PermissionContract;
+use BeatSwitch\Lock\Permissions\PermissionFactory;
 
 class EloquentDriver implements Driver
 {
