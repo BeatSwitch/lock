@@ -144,7 +144,7 @@ class Lock
      */
     public function alias($name, $actions)
     {
-        $this->aliases[$name] = new Actionalias($name, $actions);
+        $this->aliases[$name] = new ActionAlias($name, $actions);
     }
 
     /**
