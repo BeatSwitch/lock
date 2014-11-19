@@ -9,7 +9,7 @@ use BeatSwitch\Lock\Contracts\Permission;
  * The store and delete methods on this driver do nothing
  * and thus only the get and has methods can be used.
  */
-abstract class ReadOnlyDriver extends AbstractDriver implements Driver
+abstract class ReadOnlyDriver implements Driver
 {
     /**
      * Stores a new permission into the driver for a caller

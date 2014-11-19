@@ -1,11 +1,9 @@
 <?php
-namespace BeatSwitch\Lock\Drivers;
+namespace BeatSwitch\Lock\Permissions;
 
-use BeatSwitch\Lock\Exceptions\InvalidPermission;
-use BeatSwitch\Lock\Permissions\Privilege;
-use BeatSwitch\Lock\Permissions\Restriction;
+use BeatSwitch\Lock\Exceptions\InvalidPermissionType;
 
-abstract class AbstractDriver
+class PermissionFactory
 {
     /**
      * Maps an array of permission data to Permission objects
@@ -13,7 +11,7 @@ abstract class AbstractDriver
      * @param array $permissions
      * @return \BeatSwitch\Lock\Contracts\Permission[]
      */
-    protected function mapPermissions(array $permissions)
+    public static function createFromArray($permissions)
     {
         return array_map(function ($permission) {
             $type = $permission['type'];
@@ -23,9 +21,8 @@ abstract class AbstractDriver
             } elseif ($type === Restriction::TYPE) {
                 return new Restriction($permission['action'], $permission['resource'], $permission['resource_id']);
             } else {
-                throw new InvalidPermission("The permission type you provided ($type) is incorrect.");
+                throw new InvalidPermissionType("The permission type you provided \"$type\" is incorrect.");
             }
         }, $permissions);
     }
 }
- 
