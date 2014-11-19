@@ -24,6 +24,7 @@ Lock is a flexible, driver based **Acl** package for **PHP 5.4+**.
     - [Implementing the Caller contract](#implementing-the-caller-contract)
     - [Working with a static driver](#working-with-a-static-driver)
     - [Working with a persistent driver](#working-with-a-persistent-driver)
+    - [Setting and checking permissions](#setting-and-checking-permissions)
     - [Setting a God caller](#setting-a-god-caller)
 - [Api](#api)
 - [Building a Driver](#building-a-driver)
@@ -180,6 +181,67 @@ class UserManagementController extends BaseController
 ```
 
 Every time the `togglePermission` method is used, the user's permission for the given action and resource type will be toggled.
+
+### Setting and checking permissions
+
+You can either `allow` or `deny` a caller from doing something. Here are a couple of ways to set and check permissions.
+
+Allow a caller to create everything.
+
+```php
+$lock->allow('create');
+
+$lock->can('create'); // true
+```
+
+Allow a caller to only create posts.
+
+```php
+$lock->allow('create', 'posts');
+
+$lock->can('create'); // false
+$lock->can('create', 'posts'); // true
+```
+
+Allow a caller to only edit a specific post with an ID of 5.
+
+```php
+$lock->allow('edit', 'posts', 5);
+
+$lock->can('edit'); // false
+$lock->can('edit', 'posts'); // false
+$lock->can('edit', 'posts', 5); // true
+```
+
+Allow a caller to edit all posts but deny them from editing one with the id of 5.
+
+```php
+$lock->allow('edit', 'posts');
+$lock->deny('edit', 'posts', 5);
+
+$lock->can('edit', 'posts'); // true
+$lock->can('edit', 'posts', 5); // false
+```
+
+Toggle a permission's value.
+
+```php
+$lock->allow('create');
+$lock->can('create'); // true
+
+$lock->toggle('create');
+$lock->can('create'); // false
+```
+
+You can allow or deny multiple actions at once and also check multiple actions at once.
+
+```php
+$lock->allow(['create', 'edit'], 'posts');
+
+$lock->can('create', 'posts'); // true
+$lock->can(['create', 'edit'], 'posts'); // true
+$lock->can(['create', 'delete'], 'posts'); // false
+```
 
 ### Setting a God caller
 
