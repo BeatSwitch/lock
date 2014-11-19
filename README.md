@@ -224,7 +224,98 @@ Toggles the return value for the given permission.
 
 ## Building a Driver
 
-Coming soon.
+You can easily build a driver by implementing the `BeatSwitch\Lock\Contracts\Driver` contract. Below we'll demonstrate how to create our own persistent driver using Laravel's Eloquent ORM as our storage mechanism. We'll assume we have a `Permission` model class with at least the following database columns:
+
+- `caller_type` (varchar, 100)
+- `caller_id` (int, 11)
+- `type` (varchar, 10)
+- `action` (varchar, 100)
+- `resource` (varchar, 100)
+- `resource_id` (int, 11)
+
+Let's check out a full implementation of the driver below. Notice that for the `getPermissions` method we're using the `PermissionFactory` class to easily map the data and create `Permission` objects from them.
+
+```php
+<?php
+
+use Permission;
+use BeatSwitch\Lock\Contracts\Caller;
+use BeatSwitch\Lock\Contracts\Driver;
+use BeatSwitch\Lock\Contracts\Permission as PermissionContract;
+
+class EloquentDriver implements Driver
+{
+    /**
+     * Returns all the permissions for a caller
+     *
+     * @param \BeatSwitch\Lock\Contracts\Caller $caller
+     * @return \BeatSwitch\Lock\Contracts\PermissionContract[]
+     */
+    public function getPermissions(Caller $caller)
+    {
+        $permissions = Permission::all();
+        
+        return PermissionFactory::createFromArray($permissions);
+    }
+
+    /**
+     * Stores a new permission into the driver for a caller
+     *
+     * @param \BeatSwitch\Lock\Contracts\Caller $caller
+     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @return void
+     */
+    public function storePermission(Caller $caller, PermissionContract $permission)
+    {
+        $permission = new Permission;
+        $permission->caller_type = $caller->getCallerType();
+        $permission->caller_id = $caller->getCallerId();
+        $permission->type = $permission->getType();
+        $permission->action = $permission->getAction();
+        $permission->resource = $permission->getResource();
+        $permission->resource_id = $permission->getResourceId();
+        $permission->save();
+    }
+
+    /**
+     * Removes a permission from the driver for a caller
+     *
+     * @param \BeatSwitch\Lock\Contracts\Caller $caller
+     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @return void
+     */
+    public function removePermission(Caller $caller, PermissionContract $permission)
+    {
+        Permission::where('caller_type', $caller->getCallerType())
+            ->where('caller_id', $caller->getCallerId())
+            ->where('type', $permission->getType())
+            ->where('action', $permission->getAction())
+            ->where('resource', $permission->getResource())
+            ->where('resource_id', $permission->getResourceId())
+            ->delete();
+    }
+
+    /**
+     * Checks if a permission is stored for a user
+     *
+     * @param \BeatSwitch\Lock\Contracts\Caller $caller
+     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @return bool
+     */
+    public function hasPermission(Caller $caller, PermissionContract $permission)
+    {
+        return (bool) Permission::where('caller_type', $caller->getCallerType())
+            ->where('caller_id', $caller->getCallerId())
+            ->where('type', $permission->getType())
+            ->where('action', $permission->getAction())
+            ->where('resource', $permission->getResource())
+            ->where('resource_id', $permission->getResourceId())
+            ->first();
+    }
+}
+```
+
+Notice that we're not checking if the permission already exists when we're attempting to store it. You don't need to worry about that because that's all been done for you in the `Lock` instance.
 
 ## Maintainer
 
