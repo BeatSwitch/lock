@@ -29,7 +29,7 @@ interface Permission
      *
      * @return string
      */
-    public function getPermissionType();
+    public function getType();
 
     /**
      * @return string

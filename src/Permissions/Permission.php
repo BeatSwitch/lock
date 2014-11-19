@@ -48,7 +48,7 @@ abstract class Permission implements PermissionContract
     public function matchesPermission(PermissionContract $permission)
     {
         return (
-            $this->getPermissionType() === $permission->getPermissionType() &&
+            $this->getType() === $permission->getType() &&
             $this->action === $permission->getAction() &&
             $this->resource === $permission->getResource() &&
             $this->resourceId === $permission->getResourceId()

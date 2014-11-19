@@ -25,7 +25,7 @@ class Restriction extends Permission
     /**
      * @return string
      */
-    public function getPermissionType()
+    public function getType()
     {
         return self::TYPE;
     }
