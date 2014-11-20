@@ -306,8 +306,8 @@ You can easily build a driver by implementing the `BeatSwitch\Lock\Contracts\Dri
 - `caller_id` (int, 11)
 - `type` (varchar, 10)
 - `action` (varchar, 100)
-- `resource_type` (varchar, 100)
-- `resource_id` (int, 11)
+- `resource_type` (varchar, 100, nullable)
+- `resource_id` (int, 11, nullable)
 
 Let's check out a full implementation of the driver below. Notice that for the `getPermissions` method we're using the `PermissionFactory` class to easily map the data and create `Permission` objects from them.
 
