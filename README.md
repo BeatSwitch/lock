@@ -349,7 +349,7 @@ class EloquentDriver implements Driver
         $permission->caller_id = $caller->getCallerId();
         $permission->type = $permission->getType();
         $permission->action = $permission->getAction();
-        $permission->resource_type = $permission->getResource();
+        $permission->resource_type = $permission->getResourceType();
         $permission->resource_id = $permission->getResourceId();
         $permission->save();
     }
@@ -367,7 +367,7 @@ class EloquentDriver implements Driver
             ->where('caller_id', $caller->getCallerId())
             ->where('type', $permission->getType())
             ->where('action', $permission->getAction())
-            ->where('resource_type', $permission->getResource())
+            ->where('resource_type', $permission->getResourceType())
             ->where('resource_id', $permission->getResourceId())
             ->delete();
     }
@@ -385,7 +385,7 @@ class EloquentDriver implements Driver
             ->where('caller_id', $caller->getCallerId())
             ->where('type', $permission->getType())
             ->where('action', $permission->getAction())
-            ->where('resource_type', $permission->getResource())
+            ->where('resource_type', $permission->getResourceType())
             ->where('resource_id', $permission->getResourceId())
             ->first();
     }

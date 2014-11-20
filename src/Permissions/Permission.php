@@ -89,14 +89,14 @@ abstract class Permission implements PermissionContract
     protected function matchesResource($resource)
     {
         // If the permission's resource id is null then all resources with a specific ID are accepted.
-        if ($this->resource->getResourceId() === null) {
-            return $this->resource->getResourceType() === $resource->getResourceType();
+        if ($this->getResourceId() === null) {
+            return $this->getResourceType() === $resource->getResourceType();
         }
 
         // Otherwise make sure that we're matching a specific resource.
         return (
-            $this->resource->getResourceType() === $resource->getResourceType() &&
-            $this->resource->getResourceId() === $resource->getResourceId()
+            $this->getResourceType() === $resource->getResourceType() &&
+            $this->getResourceId() === $resource->getResourceId()
         );
     }
 
@@ -114,5 +114,25 @@ abstract class Permission implements PermissionContract
     public function getResource()
     {
         return $this->resource;
+    }
+
+    /**
+     * The resource's type
+     *
+     * @return string|null
+     */
+    public function getResourceType()
+    {
+        return $this->resource ? $this->resource->getResourceType() : null;
+    }
+
+    /**
+     * The resource's identifier
+     *
+     * @return int|null
+     */
+    public function getResourceId()
+    {
+        return $this->resource ? $this->resource->getResourceId() : null;
     }
 }

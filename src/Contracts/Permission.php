@@ -43,5 +43,19 @@ interface Permission
      * @return \BeatSwitch\Lock\Contracts\Resource|null
      */
     public function getResource();
+
+    /**
+     * The resource's type
+     *
+     * @return string|null
+     */
+    public function getResourceType();
+
+    /**
+     * The resource's identifier
+     *
+     * @return id|null
+     */
+    public function getResourceId();
 }
  
