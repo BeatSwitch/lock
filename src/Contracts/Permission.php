@@ -10,11 +10,10 @@ interface Permission
      * Validate a permission against the given params
      *
      * @param string $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
-     * @param int $resourceId
+     * @param \BeatSwitch\Lock\Contracts\Resource $resource
      * @return bool
      */
-    public function isAllowed($action, $resource = null, $resourceId = null);
+    public function isAllowed($action, Resource $resource = null);
 
     /**
      * Determine if a permission exactly matches the current instance
@@ -32,18 +31,17 @@ interface Permission
     public function getType();
 
     /**
+     * The action the permission is set for
+     *
      * @return string
      */
     public function getAction();
 
     /**
-     * @return string|null
+     * The optional resource an action should be checked on
+     *
+     * @return \BeatSwitch\Lock\Contracts\Resource|null
      */
     public function getResource();
-
-    /**
-     * @return int|null
-     */
-    public function getResourceId();
 }
  

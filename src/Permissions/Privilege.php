@@ -1,5 +1,6 @@
 <?php
 namespace BeatSwitch\Lock\Permissions;
+use BeatSwitch\Lock\Contracts\Resource;
 
 /**
  * A privilege is placed when you allow a caller something
@@ -13,13 +14,12 @@ class Privilege extends Permission
      * Validate a permission against the given params
      *
      * @param string $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
-     * @param int $resourceId
+     * @param \BeatSwitch\Lock\Contracts\Resource $resource
      * @return bool
      */
-    public function isAllowed($action, $resource = null, $resourceId = null)
+    public function isAllowed($action, Resource $resource = null)
     {
-        return $this->resolve($action, $resource, $resourceId);
+        return $this->resolve($action, $resource);
     }
 
     /**

@@ -92,4 +92,3 @@ class ArrayDriver implements Driver
         return 'caller_' . $caller->getCallerType() . '_' . $caller->getCallerId();
     }
 }
- 

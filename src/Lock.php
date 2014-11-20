@@ -4,6 +4,7 @@ namespace BeatSwitch\Lock;
 use BeatSwitch\Lock\Contracts\Caller;
 use BeatSwitch\Lock\Contracts\Driver;
 use BeatSwitch\Lock\Contracts\Permission;
+use BeatSwitch\Lock\Contracts\Resource as ResourceContract;
 use BeatSwitch\Lock\Permissions\Privilege;
 use BeatSwitch\Lock\Permissions\Restriction;
 
@@ -47,15 +48,16 @@ class Lock
     public function can($action, $resource = null, $resourceId = null)
     {
         $actions = (array) $action;
+        $resource = $this->resolveResource($resource, $resourceId);
 
         foreach ($actions as $action) {
             if ($aliases = $this->getAliasesForAction($action)) {
-                if ($this->can($aliases, $resource, $resourceId)) {
+                if ($this->can($aliases, $resource)) {
                     return true;
                 }
             }
 
-            if (! $this->isAllowed($action, $resource, $resourceId)) {
+            if (! $this->isAllowed($action, $resource)) {
                 return false;
             }
         }
@@ -86,15 +88,16 @@ class Lock
     public function allow($action, $resource = null, $resourceId = null)
     {
         $actions = (array) $action;
+        $resource = $this->resolveResource($resource, $resourceId);
 
         foreach ($actions as $action) {
-            $restriction = new Restriction($action, $resource, $resourceId);
+            $restriction = new Restriction($action, $resource);
 
             if ($this->hasPermission($restriction)) {
                 $this->removePermission($restriction);
             }
 
-            $this->storePermission(new Privilege($action, $resource, $resourceId));
+            $this->storePermission(new Privilege($action, $resource));
         }
     }
 
@@ -108,15 +111,16 @@ class Lock
     public function deny($action, $resource = null, $resourceId = null)
     {
         $actions = (array) $action;
+        $resource = $this->resolveResource($resource, $resourceId);
 
         foreach ($actions as $action) {
-            $privilege = new Privilege($action, $resource, $resourceId);
+            $privilege = new Privilege($action, $resource);
 
             if ($this->hasPermission($privilege)) {
                 $this->removePermission($privilege);
             }
 
-            $this->storePermission(new Restriction($action, $resource, $resourceId));
+            $this->storePermission(new Restriction($action, $resource));
         }
     }
 
@@ -151,11 +155,10 @@ class Lock
      * Determine if an action is allowed
      *
      * @param string $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
-     * @param int $resourceId
+     * @param \BeatSwitch\Lock\Contracts\Resource $resource
      * @return bool
      */
-    protected function isAllowed($action, $resource, $resourceId)
+    protected function isAllowed($action, ResourceContract $resource = null)
     {
         $permissions = $this->getPermissions();
 
@@ -165,8 +168,8 @@ class Lock
             // Check if the restriction is valid.
             if (
                 $permission instanceof Restriction &&
-                $permission->matchesPermission(new Restriction($action, $resource, $resourceId))
-                && ! $permission->isAllowed($action, $resource, $resourceId)
+                $permission->matchesPermission(new Restriction($action, $resource))
+                && ! $permission->isAllowed($action, $resource)
             ) {
                 // If we've found a matching restriction, set the flag to false.
                 return false;
@@ -176,7 +179,7 @@ class Lock
         // Search for privileges in the permissions.
         foreach ($permissions as $permission) {
             // Check if the privilege is valid.
-            if ($permission instanceof Privilege && $permission->isAllowed($action, $resource, $resourceId)) {
+            if ($permission instanceof Privilege && $permission->isAllowed($action, $resource)) {
                 // If we've found a valid privilege, set the flag to true.
                 return true;
             }
@@ -246,6 +249,22 @@ class Lock
     protected function hasAnExistingCaller()
     {
         return $this->caller->getCallerType() !== null && $this->caller->getCallerId() !== null;
+    }
+
+    /**
+     * Create a resource object if a non resource object is passed
+     *
+     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param int|null $resourceId
+     * @return \BeatSwitch\Lock\Contracts\Resource
+     */
+    protected function resolveResource($resource, $resourceId = null)
+    {
+        if (! $resource instanceof ResourceContract) {
+            return new Resource($resource, $resourceId);
+        }
+
+        return $resource;
     }
 
     /**

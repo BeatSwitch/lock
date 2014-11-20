@@ -12,31 +12,18 @@ abstract class Permission implements PermissionContract
     protected $action;
 
     /**
-     * @var string|null
+     * @var \BeatSwitch\Lock\Contracts\Resource|null
      */
     protected $resource;
 
     /**
-     * @var int|null
-     */
-    protected $resourceId;
-
-    /**
      * @param string $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
-     * @param int $resourceId
+     * @param \BeatSwitch\Lock\Contracts\Resource $resource
      */
-    public function __construct($action, $resource = null, $resourceId = null)
+    public function __construct($action, Resource $resource = null)
     {
         $this->action = $action;
-
-        if ($resource instanceof Resource) {
-            $this->resource = $resource->getResourceType();
-            $this->resourceId = $resource->getResourceId();
-        } else {
-            $this->resource = $resource;
-            $this->resourceId = $resourceId;
-        }
+        $this->resource = $resource;
     }
 
     /**
@@ -48,10 +35,9 @@ abstract class Permission implements PermissionContract
     public function matchesPermission(PermissionContract $permission)
     {
         return (
-            $this->getType() === $permission->getType() &&
-            $this->action === $permission->getAction() &&
-            $this->resource === $permission->getResource() &&
-            $this->resourceId === $permission->getResourceId()
+            $this instanceof $permission &&
+            $this->action === $permission->getAction() && // Not using matchesAction to avoid the wildcard
+            $this->matchesResource($permission->getResource())
         );
     }
 
@@ -59,22 +45,32 @@ abstract class Permission implements PermissionContract
      * Validate a permission against the given params.
      *
      * @param string $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
-     * @param int $resourceId
+     * @param \BeatSwitch\Lock\Contracts\Resource $resource
      * @return bool
      */
-    protected function resolve($action, $resource = null, $resourceId = null)
+    protected function resolve($action, Resource $resource = null)
     {
         // If no resource was set for this permission we'll only need to check the action.
-        if ($this->resource === null && $this->resourceId === null) {
+        if ($this->resource === null || $this->resource->getResourceType() === null) {
             return $this->matchesAction($action);
         }
 
-        return $this->matchesAction($action) && $this->matchesResource($resource, $resourceId);
+        return $this->matchesAction($action) && $this->matchesResource($resource);
     }
 
     /**
-     * Validate the action.
+     * Check if the given type is equal to the permission's type
+     *
+     * @param string $type
+     * @return bool
+     */
+    protected function matchesType($type)
+    {
+        return $this->getType() === $type;
+    }
+
+    /**
+     * Validate the action
      *
      * @param string $action
      * @return bool
@@ -85,25 +81,23 @@ abstract class Permission implements PermissionContract
     }
 
     /**
-     * Validate the resource.
+     * Validate the resource
      *
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
-     * @param int $resourceId
+     * @param \BeatSwitch\Lock\Contracts\Resource|null $resource
      * @return bool
      */
-    protected function matchesResource($resource, $resourceId = null)
+    protected function matchesResource($resource)
     {
-        if ($resource instanceof Resource) {
-            $resourceId = $resource->getResourceId();
-            $resource = $resource->getResourceType();
+        // If the permission's resource id is null then all resources with a specific ID are accepted.
+        if ($this->resource->getResourceId() === null) {
+            return $this->resource->getResourceType() === $resource->getResourceType();
         }
 
-        // If no resource id was set for this permission we'll only need to check the resource type.
-        if ($this->resourceId === null) {
-            return $this->resource === $resource;
-        }
-
-        return $this->resource === $resource && $this->resourceId == $resourceId;
+        // Otherwise make sure that we're matching a specific resource.
+        return (
+            $this->resource->getResourceType() === $resource->getResourceType() &&
+            $this->resource->getResourceId() === $resource->getResourceId()
+        );
     }
 
     /**
@@ -115,18 +109,10 @@ abstract class Permission implements PermissionContract
     }
 
     /**
-     * @return string|null
+     * @return \BeatSwitch\Lock\Contracts\Resource|null
      */
     public function getResource()
     {
         return $this->resource;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getResourceId()
-    {
-        return $this->resourceId;
     }
 }
