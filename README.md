@@ -111,7 +111,7 @@ class User implements Caller
 
     public function getCallerRoles()
     {
-        return ['editor'];
+        return ['editor', 'publisher'];
     }
 }
 ```
@@ -137,7 +137,7 @@ class Organization implements Caller
 
     public function getCallerRoles()
     {
-        return ['editor', 'publisher'];
+        return ['enterprise'];
     }
 }
 ```
@@ -428,7 +428,7 @@ class Organization implements Caller
 
     public function getCallerRoles()
     {
-        return ['editor', 'publisher'];
+        return ['enterprise'];
     }
 }
 ```
@@ -526,7 +526,7 @@ Set one or more roles and an optional role to inherit permissions from.
 
 ### allowRole
 
-Sets a `Privilege` permission on a role to allow it to do something. Removes any matching restrictions.
+Sets a `Privilege` permission on one or more roles to allow them to do something. Removes any matching restrictions.
 
 ```
 allowRole(
