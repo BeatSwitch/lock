@@ -107,6 +107,11 @@ class User implements Caller
     {
         return $this->id;
     }
+
+    public function getCallerRoles()
+    {
+        return ['editor'];
+    }
 }
 ```
 
