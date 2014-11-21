@@ -17,13 +17,20 @@ abstract class Permission implements PermissionContract
     protected $resource;
 
     /**
+     * @var \BeatSwitch\Lock\Contracts\Condition[]
+     */
+    protected $conditions;
+
+    /**
      * @param string $action
      * @param \BeatSwitch\Lock\Contracts\Resource $resource
+     * @param \BeatSwitch\Lock\Contracts\Condition[]
      */
-    public function __construct($action, Resource $resource = null)
+    public function __construct($action, Resource $resource = null, array $conditions = [])
     {
         $this->action = $action;
         $this->resource = $resource;
+        $this->conditions = $conditions;
     }
 
     /**
@@ -52,10 +59,10 @@ abstract class Permission implements PermissionContract
     {
         // If no resource was set for this permission we'll only need to check the action.
         if ($this->resource === null || $this->resource->getResourceType() === null) {
-            return $this->matchesAction($action);
+            return $this->matchesAction($action) && $this->resolveConditions();
         }
 
-        return $this->matchesAction($action) && $this->matchesResource($resource);
+        return $this->matchesAction($action) && $this->matchesResource($resource) && $this->resolveConditions();
     }
 
     /**
@@ -98,6 +105,22 @@ abstract class Permission implements PermissionContract
             $this->getResourceType() === $resource->getResourceType() &&
             $this->getResourceId() === $resource->getResourceId()
         );
+    }
+
+    /**
+     * Check all the conditions and make sure they all return true
+     *
+     * @return bool
+     */
+    protected function resolveConditions()
+    {
+        foreach ($this->conditions as $condition) {
+            if (! $condition->assert($this->action, $this->resource)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

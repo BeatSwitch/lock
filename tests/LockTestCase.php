@@ -4,6 +4,8 @@ namespace BeatSwitch\Lock\Tests;
 use BeatSwitch\Lock\Lock;
 use BeatSwitch\Lock\Manager;
 use BeatSwitch\Lock\Tests\Stubs\Event;
+use BeatSwitch\Lock\Tests\Stubs\FalseCondition;
+use BeatSwitch\Lock\Tests\Stubs\TrueCondition;
 use BeatSwitch\Lock\Tests\Stubs\User;
 
 abstract class LockTestCase extends \PHPUnit_Framework_TestCase
@@ -100,9 +102,14 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         // Allow to manage accounts.
         $lock->allow('manage', 'accounts');
 
+        // Set some permissions for roles.
         $lock->allowRole('user', 'create', 'pages');
         $lock->allowRoles(['editor', 'admin'], 'publish', 'pages');
         $lock->allowRole('admin', 'delete', 'pages');
+
+        // Set some conditions on permissions.
+        $lock->allow('upload', 'files', null, [new TrueCondition()]);
+        $lock->allow('upload', 'photos', null, [new FalseCondition()]);
 
         return $lock;
     }
@@ -248,7 +255,6 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->lock->can(['read', 'update'], 'accounts'));
     }
 
-
     /** @test */
     final function it_can_work_with_roles()
     {
@@ -258,5 +264,12 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         // If we deny the user from publishing anything afterwards, our role permissions are invalid.
         $this->lock->deny('publish');
         $this->assertFalse($this->lock->can(['create', 'publish'], 'pages'));
+    }
+
+    /** @test */
+    final function it_can_work_with_conditions()
+    {
+        $this->assertTrue($this->lock->can('upload', 'files'));
+        $this->assertFalse($this->lock->can('upload', 'photos'));
     }
 }

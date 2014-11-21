@@ -29,6 +29,7 @@ Lock is a flexible, driver based **Acl** package for **PHP 5.4+**.
     - [Setting an action alias](#setting-an-action-alias)
     - [Setting a God caller](#setting-a-god-caller)
     - [Working with roles](#working-with-roles)
+    - [Working with conditions](#working-with-conditions)
 - [Api](#api)
 - [Building a Driver](#building-a-driver)
 - [Maintainer](#maintainer)
@@ -50,6 +51,7 @@ Lock is a flexible, driver based **Acl** package for **PHP 5.4+**.
 - Static or persistent drivers to store permissions
 - Action aliases
 - Roles
+- Conditions (Asserts)
 - Easily Implement acl functionality on your caller with a trait
 
 ## Introduction
@@ -71,7 +73,6 @@ If you need a framework-specific implementation, pick one of the already prepare
 
 ## Roadmap
 
-- Permission Conditions
 - Group Permissions
 - More drivers (Symfony, Zend Framework, Doctrine, ...)
 - Event Listeners
@@ -337,57 +338,201 @@ $lock->denyRole('user', 'create', 'posts');
 $lock->can('create', 'posts'); // true: the user has explicit permission to create posts.
 ```
 
+### Working with conditions
+
+Conditions are actually asserts which are extra checks you can set for permissions. You can pass an array with them as the last parameter of `allow` and `deny`. All conditions must implement the `\BeatSwitch\Lock\Contracts\Condition` interface.
+
+Let's setup a condition.
+
+```php
+<?php
+
+use BeatSwitch\Lock\Contracts\Condition;
+use BeatSwitch\Lock\Contracts\Resource;
+use Illuminate\Auth\AuthManager;
+
+class LoggedInCondition implements Condition
+{
+    /**
+     * The Laravel AuthManager instance
+     *
+     * @var \Illuminate\Auth\AuthManager
+     */
+    protected $auth;
+
+    /**
+     * @param \Illuminate\Auth\AuthManager $auth
+     */
+    public function __construct(AuthManager $auth)
+    {
+        $this->auth = $auth;
+    }
+
+    /**
+     * Assert if the condition is correct
+     *
+     * @param string $action
+     * @param \BeatSwitch\Lock\Contracts\Resource $resource
+     * @return bool
+     */
+    public function assert($action, Resource $resource)
+    {
+        // Condition will succeed if the user is logged in.
+        return $this->auth->check();
+    }
+}
+```
+
+Now let's see how this will work when setting up a permission.
+
+```php
+$condition = App::make('LoggedInCondition');
+
+$lock->allow('create', 'posts', null, [$condition]);
+$lock->can('create', 'posts'); // true if logged in, otherwise false.
+```
+
+You can pass along as many conditions as you like but they all need to succeed in order for the permission to work.
+
 ## Api
 
-The following methods can all be called on a valid `Lock` instance. For readability, I've remove the `BeatSwitch\Lock\Contracts` namespace for the interfaces.
+The following methods can all be called on a `\BeatSwitch\Lock\Lock` instance.
 
-`can(string|array $action, string|Resource $resource = null, int $resourceId = null)`
+### can
 
 Checks to see if the current caller has permission to do something.
 
-`cannot(string|array $action, string|Resource $resource = null, int $resourceId = null)`
+```
+can(
+    string|array $action,
+    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    int $resourceId = null
+)
+```
+
+### cannot
 
 Checks to see if it's forbidden for the current caller to do something.
 
-`allow(string|array $action, string|Resource $resource = null, int $resourceId = null)`
+```
+cannot(
+    string|array $action,
+    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    int $resourceId = null
+)
+```
+
+### allow
 
 Sets a `Privilege` permission on a caller to allow it to do something. Removes any matching restrictions.
 
-`deny(string|array $action, string|Resource $resource = null, int $resourceId = null)`
+```
+allow(
+    string|array $action,
+    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    int $resourceId = null,
+    \BeatSwitch\Lock\Contracts\Condition[] $conditions = []
+)
+```
+
+### deny
 
 Sets a `Restriction` permission on a caller to prevent it from doing something. Removes any matching privileges.
 
-`toggle(string|array $action, string|Resource $resource = null, int $resourceId = null)`
+```
+deny(
+    string|array $action,
+    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    int $resourceId = null,
+    \BeatSwitch\Lock\Contracts\Condition[] $conditions = []
+)
+```
 
-Toggles the return value for the given permission.
+### toggle
 
-`alias($name, $actions)`
+Toggles the value for the given permission.
+
+```
+toggle(
+    string|array $action,
+    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    int $resourceId = null
+)
+```
+
+### alias
 
 Add an alias for one or more actions.
 
-`setRole(string $name, string $inherit = null)`
+`alias($name, $actions)`
+
+### setRole
 
 Set a single user role and an optional role to inherit permissions from.
 
-`setRoles(array $names, string $inherit = null)`
+`setRole(string $name, string $inherit = null)`
+
+### setRoles
 
 Set multiple user roles and an optional role to inherit permissions from.
 
-`allowRole(string|Role $role, string|array $action, string|Resource $resource = null, int $resourceId = null)`
+`setRoles(array $names, string $inherit = null)`
+
+### allowRole
 
 Sets a `Privilege` permission on a role to allow it to do something. Removes any matching restrictions.
 
-`allowRoles(array|Role[] $roles, string|array $action, string|Resource $resource = null, int $resourceId = null)`
+```
+allowRole(
+    string|\BeatSwitch\Lock\Contracts\Role $role,
+    string|array $action,
+    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    int $resourceId = null,
+    \BeatSwitch\Lock\Contracts\Condition[] $conditions = []
+)
+```
+
+### allowRoles
 
 Sets a `Privilege` permission on multiple roles to allow them to do something. Removes any matching restrictions.
 
-`denyRole(string|Role $role, string|array $action, string|Resource $resource = null, int $resourceId = null)`
+```
+allowRoles(
+    array|\BeatSwitch\Lock\Contracts\Role[] $roles,
+    string|array $action,
+    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    int $resourceId = null,
+    \BeatSwitch\Lock\Contracts\Condition[] $conditions = []
+)
+```
+
+### denyRole
 
 Sets a `Restriction` permission on a role to prevent it from doing something. Removes any matching privileges.
 
-`denyRoles(array|Role[] $roles, string|array $action, string|Resource $resource = null, int $resourceId = null)`
+```
+denyRole(
+    string|\BeatSwitch\Lock\Contracts\Role $role,
+    string|array $action,
+    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    int $resourceId = null,
+    \BeatSwitch\Lock\Contracts\Condition[] $conditions = []
+)
+```
+
+### denyRoles
 
 Sets a `Restriction` permission on multiple roles to prevent them from doing something. Removes any matching privileges.
+
+```
+denyRoles(
+    array|\BeatSwitch\Lock\Contracts\Role[] $roles,
+    string|array $action,
+    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    int $resourceId = null,
+    \BeatSwitch\Lock\Contracts\Condition[] $conditions = []
+)
+```
 
 ## Building a Driver
 

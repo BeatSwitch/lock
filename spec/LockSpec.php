@@ -1,10 +1,16 @@
 <?php
 namespace spec\BeatSwitch\Lock;
 
+// For some bizar reason it can find the CallerStub but not the rest of the stubs.
+require __DIR__ . '/Stubs/TrueCondition.php';
+require __DIR__ . '/Stubs/FalseCondition.php';
+
 use BeatSwitch\Lock\Drivers\ArrayDriver;
 use BeatSwitch\Lock\Callers\NullCaller;
 use PhpSpec\ObjectBehavior;
 use spec\BeatSwitch\Lock\Stubs\CallerStub;
+use spec\BeatSwitch\Lock\Stubs\FalseCondition;
+use spec\BeatSwitch\Lock\Stubs\TrueCondition;
 
 class LockSpec extends ObjectBehavior
 {
@@ -164,6 +170,15 @@ class LockSpec extends ObjectBehavior
         // Our CallerStub has the editor role.
         $this->can(['create', 'publish'], 'posts')->shouldReturn(true);
         $this->can('delete', 'posts')->shouldReturn(false);
+    }
+
+    function it_can_work_with_permission_conditions()
+    {
+        $this->allow('create', 'posts', null, [new TrueCondition()]);
+        $this->allow('create', 'pages', null, [new FalseCondition()]);
+
+        $this->can('create', 'posts')->shouldReturn(true);
+        $this->can('create', 'pages')->shouldReturn(false);
     }
 
     function it_always_returns_false_when_it_is_a_nullcaller()

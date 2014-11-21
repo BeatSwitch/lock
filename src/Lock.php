@@ -6,7 +6,6 @@ use BeatSwitch\Lock\Contracts\Driver;
 use BeatSwitch\Lock\Contracts\Permission;
 use BeatSwitch\Lock\Contracts\Resource as ResourceContract;
 use BeatSwitch\Lock\Contracts\Role as RoleContract;
-use BeatSwitch\Lock\Exceptions\RoleNotFound;
 use BeatSwitch\Lock\Permissions\Privilege;
 use BeatSwitch\Lock\Permissions\Restriction;
 
@@ -91,8 +90,9 @@ class Lock
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
      * @param int $resourceId
+     * @param \BeatSwitch\Lock\Contracts\Condition[] $conditions
      */
-    public function allow($action, $resource = null, $resourceId = null)
+    public function allow($action, $resource = null, $resourceId = null, array $conditions = [])
     {
         $actions = (array) $action;
         $resource = $this->getResourceObject($resource, $resourceId);
@@ -113,7 +113,7 @@ class Lock
                 $this->removePermission($restriction);
             }
 
-            $this->storePermission(new Privilege($action, $resource));
+            $this->storePermission(new Privilege($action, $resource, $conditions));
         }
     }
 
@@ -123,8 +123,9 @@ class Lock
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
      * @param int $resourceId
+     * @param \BeatSwitch\Lock\Contracts\Condition[] $conditions
      */
-    public function deny($action, $resource = null, $resourceId = null)
+    public function deny($action, $resource = null, $resourceId = null, array $conditions = [])
     {
         $actions = (array) $action;
         $resource = $this->getResourceObject($resource, $resourceId);
@@ -144,7 +145,7 @@ class Lock
                 $this->removePermission($privilege);
             }
 
-            $this->storePermission(new Restriction($action, $resource));
+            $this->storePermission(new Restriction($action, $resource, $conditions));
         }
     }
 
@@ -206,8 +207,9 @@ class Lock
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
      * @param int $resourceId
+     * @param \BeatSwitch\Lock\Contracts\Condition[]
      */
-    public function allowRole($role, $action, $resource = null, $resourceId = null)
+    public function allowRole($role, $action, $resource = null, $resourceId = null, array $conditions = [])
     {
         $actions = (array) $action;
         $resource = $this->getResourceObject($resource, $resourceId);
@@ -229,7 +231,7 @@ class Lock
                     $this->removeRolePermission($role, $restriction);
                 }
 
-                $this->storeRolePermission($role, new Privilege($action, $resource));
+                $this->storeRolePermission($role, new Privilege($action, $resource, $conditions));
             }
         }
     }
@@ -241,11 +243,12 @@ class Lock
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
      * @param int $resourceId
+     * @param \BeatSwitch\Lock\Contracts\Condition[]
      */
-    public function allowRoles(array $roles, $action, $resource = null, $resourceId = null)
+    public function allowRoles(array $roles, $action, $resource = null, $resourceId = null, array $conditions = [])
     {
         foreach ($roles as $role) {
-            $this->allowRole($role, $action, $resource, $resourceId);
+            $this->allowRole($role, $action, $resource, $resourceId, $conditions);
         }
     }
 
@@ -256,8 +259,9 @@ class Lock
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
      * @param int $resourceId
+     * @param \BeatSwitch\Lock\Contracts\Condition[]
      */
-    public function denyRole($role, $action, $resource = null, $resourceId = null)
+    public function denyRole($role, $action, $resource = null, $resourceId = null, array $conditions = [])
     {
         $actions = (array) $action;
         $resource = $this->getResourceObject($resource, $resourceId);
@@ -279,7 +283,7 @@ class Lock
                     $this->removeRolePermission($role, $privilege);
                 }
 
-                $this->storeRolePermission($role, new Restriction($action, $resource));
+                $this->storeRolePermission($role, new Restriction($action, $resource, $conditions));
             }
         }
     }
@@ -291,11 +295,12 @@ class Lock
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
      * @param int $resourceId
+     * @param \BeatSwitch\Lock\Contracts\Condition[]
      */
-    public function denyRoles(array $roles, $action, $resource = null, $resourceId = null)
+    public function denyRoles(array $roles, $action, $resource = null, $resourceId = null, array $conditions = [])
     {
         foreach ($roles as $role) {
-            $this->denyRole($role, $action, $resource, $resourceId);
+            $this->denyRole($role, $action, $resource, $resourceId, $conditions);
         }
     }
 
