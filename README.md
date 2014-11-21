@@ -40,13 +40,13 @@ Made possible thanks to [BeatSwitch](https://beatswitch.com). Inspired by [Autho
 
 ## Terminology
 
-- `Caller`: On object that can have permissions to do something
+- `Caller`: On identity object that can have permissions to do something
 - `Driver`: A storage system for permissions which can either be static or persistent
 - `Permission`: A permission holds an action and an optional (unique) resource. Can be either a `Restriction` or a `Privilege`
-- `Restriction`: A restriction denies you from being able to perform an action on an (optional) resource
-- `Privilege`: A privilege allows you to perform an action on an (optional) resource
+- `Restriction`: A restriction denies you from being able to perform an action (on an optional resource)
+- `Privilege`: A privilege allows you to perform an action (on an optional resource)
 - `Action`: An action is something you are either allowed or denied to do
-- `Resource`: A resource can be an object where you can perform one or more actions on. It can either target a certain type of resources or a specific resource by its unique identifier
+- `Resource`: A resource can be an object where you can perform one or more actions on. It can either target a certain type of resource or a specific resource by its unique identifier
 
 ## Features
 
