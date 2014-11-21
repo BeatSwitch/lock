@@ -9,7 +9,7 @@
 
 Lock is a flexible, driver based **Acl** package for **PHP 5.4+**.
 
-[Job Details](http://creativeskills.be/jobs/php-development/php-developer-beatswitch-14-10-14.html). Logo by [Jerry Low](http://www.jerrylow.com).
+Made possible thanks to [BeatSwitch](https://beatswitch.com). Inspired by [Authority](https://github.com/machuga/authority) by [Matthew Machuga](https://twitter.com/machuga). [Job Details](http://creativeskills.be/jobs/php-development/php-developer-beatswitch-14-10-14.html). Logo by [Jerry Low](http://www.jerrylow.com).
 
 > **Warning:** This package is currently in alpha stage. This means that there is no guaranty that the current structure, contracts, terminology an/or implementations will stay the same until the package hits stable. Please do not use this in production until a stable release it out.
 
