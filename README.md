@@ -347,6 +347,8 @@ $lock->can('create', 'posts'); // true: the user has explicit permission to crea
 
 Conditions are actually asserts which are extra checks you can set for permissions. You can pass an array with them as the last parameter of `allow` and `deny`. All conditions must implement the `\BeatSwitch\Lock\Contracts\Condition` interface.
 
+> **Warning:** please note that conditions currently only work with static drivers.
+
 Let's setup a condition.
 
 ```php
