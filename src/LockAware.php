@@ -1,17 +1,15 @@
 <?php
-namespace BeatSwitch\Lock\Callers;
+namespace BeatSwitch\Lock;
 
-use BeatSwitch\Lock\Exceptions\InvalidLockCaller;
+use BeatSwitch\Lock\Exceptions\InvalidCaller;
 use BeatSwitch\Lock\Exceptions\LockInstanceNotSet;
-use BeatSwitch\Lock\Lock;
-use BeatSwitch\Lock\Manager;
 
 /**
  * This trait can be used on objects which extend the Caller contract. After
  * setting the Lock instance with the setLock method, the caller receives
  * the ability to call the public api from the lock instance onto itself.
  */
-trait CallerTrait
+trait LockAware
 {
     /**
      * The current caller's lock instance
@@ -21,9 +19,9 @@ trait CallerTrait
     protected $lock;
 
     /**
-     * Determine if an action is allowed
+     * Determine if one or more actions are allowed
      *
-     * @param string $action
+     * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
      * @param int $resourceId
      * @return bool
@@ -38,7 +36,7 @@ trait CallerTrait
     /**
      * Determine if an action isn't allowed
      *
-     * @param string $action
+     * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
      * @param int $resourceId
      * @return bool
@@ -51,37 +49,39 @@ trait CallerTrait
     }
 
     /**
-     * Adds a permission for a caller
+     * Give a caller permission to do something
      *
-     * @param string $action
+     * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
      * @param int $resourceId
+     * @param \BeatSwitch\Lock\Contracts\Condition[] $conditions
      */
-    public function allow($action, $resource = null, $resourceId = null)
+    public function allow($action, $resource = null, $resourceId = null, array $conditions = [])
     {
         $this->assertLockInstanceIsSet();
 
-        $this->lock->allow($action, $resource, $resourceId);
+        $this->lock->allow($action, $resource, $resourceId, $conditions);
     }
 
     /**
-     * Removes a permission from a caller
+     * Deny a caller from doing something
      *
-     * @param string $action
+     * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
      * @param int $resourceId
+     * @param \BeatSwitch\Lock\Contracts\Condition[] $conditions
      */
-    public function deny($action, $resource = null, $resourceId = null)
+    public function deny($action, $resource = null, $resourceId = null, array $conditions = [])
     {
         $this->assertLockInstanceIsSet();
 
-        $this->lock->deny($action, $resource, $resourceId);
+        $this->lock->deny($action, $resource, $resourceId, $conditions);
     }
 
     /**
      * Change the value for a permission
      *
-     * @param string $action
+     * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
      * @param int $resourceId
      */
@@ -95,11 +95,17 @@ trait CallerTrait
     /**
      * Sets the lock instance for this caller
      *
-     * @param \BeatSwitch\Lock\Manager $manager
+     * @param \BeatSwitch\Lock\Lock $lock
+     * @throws \BeatSwitch\Lock\Exceptions\InvalidCaller
      */
-    public function setLock(Manager $manager)
+    public function setLock(Lock $lock)
     {
-        $this->lock = $manager->caller($this);
+        // Make sure that the caller from the given lock instance is this caller.
+        if ($lock->getCaller() !== $this) {
+            throw new InvalidCaller('The caller from the given lock instance is different from the current caller.');
+        }
+
+        $this->lock = $lock;
     }
 
     /**

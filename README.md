@@ -30,6 +30,7 @@ Lock is a flexible, driver based **Acl** package for **PHP 5.4+**.
     - [Setting a God caller](#setting-a-god-caller)
     - [Working with roles](#working-with-roles)
     - [Working with conditions](#working-with-conditions)
+    - [Using the LockAware trait](#using-the-lockaware-trait)
 - [Api](#api)
 - [Building a Driver](#building-a-driver)
 - [Maintainer](#maintainer)
@@ -400,6 +401,50 @@ $lock->can('create', 'posts'); // true if logged in, otherwise false.
 ```
 
 You can pass along as many conditions as you like but they all need to succeed in order for the permission to work.
+
+### Using the LockAware trait
+
+You can easily add acl functionality to your caller by implementing the `BeatSwitch\Lock\LockAware` trait.
+
+```php
+<?php
+
+use BeatSwitch\Lock\Contracts\Caller;
+use BeatSwitch\Lock\LockAware;
+
+class Organization implements Caller
+{
+    use LockAware;
+
+    public function getCallerType()
+    {
+        return 'organizations';
+    }
+
+    public function getCallerId()
+    {
+        return $this->id;
+    }
+
+    public function getCallerRoles()
+    {
+        return ['editor', 'publisher'];
+    }
+}
+```
+
+Now we need to set its lock instance.
+
+```php
+$caller->setLock($lock);
+```
+
+And now your caller can use all of the lock methods onto itself.
+
+```php
+$caller->can('create', 'posts');
+$caller->allow('edit', 'pages');
+```
 
 ## Api
 

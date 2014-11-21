@@ -55,7 +55,7 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         $this->lock = $this->configureLock($lock);
 
         // Set the Lock instance on the caller to init the trait functionality.
-        $caller->setLock($this->manager);
+        $caller->setLock($this->lock);
         $this->caller = $caller;
     }
 
