@@ -9,7 +9,7 @@
 
 Lock is a flexible, driver based **Acl** package for **PHP 5.4+**.
 
-<a href="http://creativeskills.be/jobs/php-development/php-developer-beatswitch-14-10-14.html">Job Details</a>. Logo by <a href="http://www.jerrylow.com">Jerry Low</a>.
+[Job Details](http://creativeskills.be/jobs/php-development/php-developer-beatswitch-14-10-14.html). Logo by [Jerry Low](http://www.jerrylow.com).
 
 > **Warning:** This package is currently in a pre-alpha stage. This means that there is no guaranty that the current structure, contracts, terminology an/or implementations will stay the same until the package hits stable. Please do not use this in production until a stable release it out.
 
@@ -306,7 +306,7 @@ $lock->setRole('user', 'guest'); // "user" will inherit all permissions from "gu
 Or register multiple roles at once.
 
 ```php
-$lock->setRoles(['editor', 'admin'], 'user'); // "editor" and "admin" will inherit all permissions from "user".
+$lock->setRole(['editor', 'admin'], 'user'); // "editor" and "admin" will inherit all permissions from "user".
 ```
 
 Let's set some permissions and see how they are resolved.
@@ -319,7 +319,7 @@ $lock->allowRole('guest', 'read');
 $lock->allowRole('user', 'create', 'posts');
 
 // Allow an editor and admin to publish posts.
-$lock->allowRoles(['editor', 'admin'], 'publish', 'posts');
+$lock->allowRole(['editor', 'admin'], 'publish', 'posts');
 
 // Allow an admin to delete posts.
 $lock->allowRole('admin', 'delete', 'posts');
@@ -475,15 +475,9 @@ Add an alias for one or more actions.
 
 ### setRole
 
-Set a single user role and an optional role to inherit permissions from.
+Set one or more roles and an optional role to inherit permissions from.
 
-`setRole(string $name, string $inherit = null)`
-
-### setRoles
-
-Set multiple user roles and an optional role to inherit permissions from.
-
-`setRoles(array $names, string $inherit = null)`
+`setRole(string|array $name, string $inherit = null)`
 
 ### allowRole
 
@@ -491,21 +485,7 @@ Sets a `Privilege` permission on a role to allow it to do something. Removes any
 
 ```
 allowRole(
-    string|\BeatSwitch\Lock\Contracts\Role $role,
-    string|array $action,
-    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
-    int $resourceId = null,
-    \BeatSwitch\Lock\Contracts\Condition[] $conditions = []
-)
-```
-
-### allowRoles
-
-Sets a `Privilege` permission on multiple roles to allow them to do something. Removes any matching restrictions.
-
-```
-allowRoles(
-    array|\BeatSwitch\Lock\Contracts\Role[] $roles,
+    string|array|\BeatSwitch\Lock\Contracts\Role $role,
     string|array $action,
     string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
     int $resourceId = null,
@@ -515,25 +495,11 @@ allowRoles(
 
 ### denyRole
 
-Sets a `Restriction` permission on a role to prevent it from doing something. Removes any matching privileges.
+Sets a `Restriction` permission on one or more roles to prevent them from doing something. Removes any matching privileges.
 
 ```
 denyRole(
-    string|\BeatSwitch\Lock\Contracts\Role $role,
-    string|array $action,
-    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
-    int $resourceId = null,
-    \BeatSwitch\Lock\Contracts\Condition[] $conditions = []
-)
-```
-
-### denyRoles
-
-Sets a `Restriction` permission on multiple roles to prevent them from doing something. Removes any matching privileges.
-
-```
-denyRoles(
-    array|\BeatSwitch\Lock\Contracts\Role[] $roles,
+    string|array|\BeatSwitch\Lock\Contracts\Role $role,
     string|array $action,
     string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
     int $resourceId = null,

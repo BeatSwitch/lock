@@ -179,31 +179,20 @@ class Lock
     /**
      * Add one role to the lock instance
      *
-     * @param string $name
+     * @param string|array $names
      * @param string $inherit
      */
-    public function setRole($name, $inherit = null)
+    public function setRole($names, $inherit = null)
     {
-        $this->roles[$name] = new Role($name, $inherit);
-    }
-
-    /**
-     * Add multiple roles to the lock instance
-     *
-     * @param array $names
-     * @param string $inherit
-     */
-    public function setRoles(array $names, $inherit = null)
-    {
-        foreach ($names as $name) {
-            $this->setRole($name, $inherit);
+        foreach ((array) $names as $name) {
+            $this->roles[$name] = new Role($name, $inherit);
         }
     }
 
     /**
      * Give a role permission to do something
      *
-     * @param string|\BeatSwitch\Lock\Contracts\Role $role
+     * @param string|array|\BeatSwitch\Lock\Contracts\Role $role
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
      * @param int $resourceId
@@ -211,79 +200,30 @@ class Lock
      */
     public function allowRole($role, $action, $resource = null, $resourceId = null, array $conditions = [])
     {
+        $roles = (array) $role;
         $actions = (array) $action;
         $resource = $this->getResourceObject($resource, $resourceId);
 
-        if ($role = $this->getRoleObject($role)) {
-            $permissions = $this->getRolePermissions($role);
-
-            foreach ($actions as $action) {
-                foreach ($permissions as $key => $permission) {
-                    if ($permission instanceof Restriction && ! $permission->isAllowed($action, $resource)) {
-                        $this->removeRolePermission($role, $permission);
-                        unset($permissions[$key]);
-                    }
-                }
-
-                $restriction = new Restriction($action, $resource);
-
-                if ($this->hasRolePermission($role, $restriction)) {
-                    $this->removeRolePermission($role, $restriction);
-                }
-
-                $this->storeRolePermission($role, new Privilege($action, $resource, $conditions));
-            }
-        }
-    }
-
-    /**
-     * Give multiple roles permission to do something
-     *
-     * @param array|\BeatSwitch\Lock\Contracts\Role[] $roles
-     * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
-     * @param int $resourceId
-     * @param \BeatSwitch\Lock\Contracts\Condition[]
-     */
-    public function allowRoles(array $roles, $action, $resource = null, $resourceId = null, array $conditions = [])
-    {
         foreach ($roles as $role) {
-            $this->allowRole($role, $action, $resource, $resourceId, $conditions);
-        }
-    }
+            if ($role = $this->getRoleObject($role)) {
+                $permissions = $this->getRolePermissions($role);
 
-    /**
-     * Deny a role from doing something
-     *
-     * @param string|\BeatSwitch\Lock\Contracts\Role $role
-     * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
-     * @param int $resourceId
-     * @param \BeatSwitch\Lock\Contracts\Condition[]
-     */
-    public function denyRole($role, $action, $resource = null, $resourceId = null, array $conditions = [])
-    {
-        $actions = (array) $action;
-        $resource = $this->getResourceObject($resource, $resourceId);
-
-        if ($role = $this->getRoleObject($role)) {
-            $permissions = $this->getRolePermissions($role);
-
-            foreach ($actions as $action) {
-                foreach ($permissions as $key => $permission) {
-                    if ($permission instanceof Privilege && $permission->isAllowed($action, $resource)) {
-                        $this->removeRolePermission($role, $permission);
-                        unset($permissions[$key]);
+                foreach ($actions as $action) {
+                    foreach ($permissions as $key => $permission) {
+                        if ($permission instanceof Restriction && !$permission->isAllowed($action, $resource)) {
+                            $this->removeRolePermission($role, $permission);
+                            unset($permissions[$key]);
+                        }
                     }
+
+                    $restriction = new Restriction($action, $resource);
+
+                    if ($this->hasRolePermission($role, $restriction)) {
+                        $this->removeRolePermission($role, $restriction);
+                    }
+
+                    $this->storeRolePermission($role, new Privilege($action, $resource, $conditions));
                 }
-
-                $privilege = new Privilege($action, $resource);
-
-                if ($this->hasRolePermission($role, $privilege)) {
-                    $this->removeRolePermission($role, $privilege);
-                }
-
-                $this->storeRolePermission($role, new Restriction($action, $resource, $conditions));
             }
         }
     }
@@ -291,16 +231,39 @@ class Lock
     /**
      * Deny a role from doing something
      *
-     * @param array|\BeatSwitch\Lock\Contracts\Role[] $roles
+     * @param string|array|\BeatSwitch\Lock\Contracts\Role $roles
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
      * @param int $resourceId
      * @param \BeatSwitch\Lock\Contracts\Condition[]
      */
-    public function denyRoles(array $roles, $action, $resource = null, $resourceId = null, array $conditions = [])
+    public function denyRole($roles, $action, $resource = null, $resourceId = null, array $conditions = [])
     {
+        $roles = (array) $roles;
+        $actions = (array) $action;
+        $resource = $this->getResourceObject($resource, $resourceId);
+
         foreach ($roles as $role) {
-            $this->denyRole($role, $action, $resource, $resourceId, $conditions);
+            if ($role = $this->getRoleObject($role)) {
+                $permissions = $this->getRolePermissions($role);
+
+                foreach ($actions as $action) {
+                    foreach ($permissions as $key => $permission) {
+                        if ($permission instanceof Privilege && $permission->isAllowed($action, $resource)) {
+                            $this->removeRolePermission($role, $permission);
+                            unset($permissions[$key]);
+                        }
+                    }
+
+                    $privilege = new Privilege($action, $resource);
+
+                    if ($this->hasRolePermission($role, $privilege)) {
+                        $this->removeRolePermission($role, $privilege);
+                    }
+
+                    $this->storeRolePermission($role, new Restriction($action, $resource, $conditions));
+                }
+            }
         }
     }
 

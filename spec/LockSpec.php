@@ -161,10 +161,10 @@ class LockSpec extends ObjectBehavior
     function it_can_work_with_roles()
     {
         $this->setRole('user');
-        $this->setRoles(['editor', 'admin'], 'user');
+        $this->setRole(['editor', 'admin'], 'user');
 
         $this->allowRole('user', 'create', 'posts');
-        $this->allowRoles(['editor', 'admin'], 'publish', 'posts');
+        $this->allowRole(['editor', 'admin'], 'publish', 'posts');
         $this->allowRole('admin', 'delete', 'posts');
 
         // Our CallerStub has the editor role.

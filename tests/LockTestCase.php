@@ -69,7 +69,7 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     {
         // Set some roles.
         $lock->setRole('user');
-        $lock->setRoles(['editor', 'admin'], 'user');
+        $lock->setRole(['editor', 'admin'], 'user');
 
         // Add an action alias.
         $lock->alias('manage', ['create', 'read', 'update', 'delete']);
@@ -104,7 +104,7 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
 
         // Set some permissions for roles.
         $lock->allowRole('user', 'create', 'pages');
-        $lock->allowRoles(['editor', 'admin'], 'publish', 'pages');
+        $lock->allowRole(['editor', 'admin'], 'publish', 'pages');
         $lock->allowRole('admin', 'delete', 'pages');
 
         // Set some conditions on permissions.
