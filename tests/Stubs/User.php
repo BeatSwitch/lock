@@ -24,4 +24,14 @@ class User implements PermissionCaller
     {
         return $this->id;
     }
+
+    /**
+     * The caller's roles
+     *
+     * @return array
+     */
+    public function getCallerRoles()
+    {
+        return ['editor'];
+    }
 }

@@ -5,6 +5,8 @@ use BeatSwitch\Lock\Contracts\Caller;
 use BeatSwitch\Lock\Contracts\Driver;
 use BeatSwitch\Lock\Contracts\Permission;
 use BeatSwitch\Lock\Contracts\Resource as ResourceContract;
+use BeatSwitch\Lock\Contracts\Role as RoleContract;
+use BeatSwitch\Lock\Exceptions\RoleNotFound;
 use BeatSwitch\Lock\Permissions\Privilege;
 use BeatSwitch\Lock\Permissions\Restriction;
 
@@ -28,6 +30,11 @@ class Lock
     protected $aliases = [];
 
     /**
+     * @var \BeatSwitch\Lock\Contracts\Role[]
+     */
+    protected $roles = [];
+
+    /**
      * @param \BeatSwitch\Lock\Contracts\Caller $caller
      * @param \BeatSwitch\Lock\Contracts\Driver $driver
      */
@@ -48,7 +55,7 @@ class Lock
     public function can($action, $resource = null, $resourceId = null)
     {
         $actions = (array) $action;
-        $resource = $this->resolveResource($resource, $resourceId);
+        $resource = $this->getResourceObject($resource, $resourceId);
 
         foreach ($actions as $action) {
             if ($aliases = $this->getAliasesForAction($action)) {
@@ -57,7 +64,7 @@ class Lock
                 }
             }
 
-            if (! $this->isAllowed($action, $resource)) {
+            if (! $this->resolvePermissions($action, $resource)) {
                 return false;
             }
         }
@@ -79,7 +86,7 @@ class Lock
     }
 
     /**
-     * Adds a permission for a caller
+     * Give a caller permission to do something
      *
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
@@ -88,9 +95,18 @@ class Lock
     public function allow($action, $resource = null, $resourceId = null)
     {
         $actions = (array) $action;
-        $resource = $this->resolveResource($resource, $resourceId);
+        $resource = $this->getResourceObject($resource, $resourceId);
+        $permissions = $this->getPermissions();
 
         foreach ($actions as $action) {
+            foreach ($permissions as $key => $permission) {
+                if ($permission instanceof Restriction && ! $permission->isAllowed($action, $resource)) {
+                    $this->removePermission($permission);
+                    unset($permissions[$key]);
+                }
+            }
+
+            // We'll need to clear any restrictions above
             $restriction = new Restriction($action, $resource);
 
             if ($this->hasPermission($restriction)) {
@@ -102,7 +118,7 @@ class Lock
     }
 
     /**
-     * Removes a permission from a caller
+     * Deny a caller from doing something
      *
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
@@ -111,9 +127,17 @@ class Lock
     public function deny($action, $resource = null, $resourceId = null)
     {
         $actions = (array) $action;
-        $resource = $this->resolveResource($resource, $resourceId);
+        $resource = $this->getResourceObject($resource, $resourceId);
+        $permissions = $this->getPermissions();
 
         foreach ($actions as $action) {
+            foreach ($permissions as $key => $permission) {
+                if ($permission instanceof Privilege && $permission->isAllowed($action, $resource)) {
+                    $this->removePermission($permission);
+                    unset($permissions[$key]);
+                }
+            }
+
             $privilege = new Privilege($action, $resource);
 
             if ($this->hasPermission($privilege)) {
@@ -152,35 +176,197 @@ class Lock
     }
 
     /**
+     * Add one role to the lock instance
+     *
+     * @param string $name
+     * @param string $inherit
+     */
+    public function setRole($name, $inherit = null)
+    {
+        $this->roles[$name] = new Role($name, $inherit);
+    }
+
+    /**
+     * Add multiple roles to the lock instance
+     *
+     * @param array $names
+     * @param string $inherit
+     */
+    public function setRoles(array $names, $inherit = null)
+    {
+        foreach ($names as $name) {
+            $this->setRole($name, $inherit);
+        }
+    }
+
+    /**
+     * Give a role permission to do something
+     *
+     * @param string|\BeatSwitch\Lock\Contracts\Role $role
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param int $resourceId
+     */
+    public function allowRole($role, $action, $resource = null, $resourceId = null)
+    {
+        $actions = (array) $action;
+        $resource = $this->getResourceObject($resource, $resourceId);
+
+        if ($role = $this->getRoleObject($role)) {
+            $permissions = $this->getRolePermissions($role);
+
+            foreach ($actions as $action) {
+                foreach ($permissions as $key => $permission) {
+                    if ($permission instanceof Restriction && ! $permission->isAllowed($action, $resource)) {
+                        $this->removeRolePermission($role, $permission);
+                        unset($permissions[$key]);
+                    }
+                }
+
+                $restriction = new Restriction($action, $resource);
+
+                if ($this->hasRolePermission($role, $restriction)) {
+                    $this->removeRolePermission($role, $restriction);
+                }
+
+                $this->storeRolePermission($role, new Privilege($action, $resource));
+            }
+        }
+    }
+
+    /**
+     * Give multiple roles permission to do something
+     *
+     * @param array|\BeatSwitch\Lock\Contracts\Role[] $roles
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param int $resourceId
+     */
+    public function allowRoles(array $roles, $action, $resource = null, $resourceId = null)
+    {
+        foreach ($roles as $role) {
+            $this->allowRole($role, $action, $resource, $resourceId);
+        }
+    }
+
+    /**
+     * Deny a role from doing something
+     *
+     * @param string|\BeatSwitch\Lock\Contracts\Role $role
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param int $resourceId
+     */
+    public function denyRole($role, $action, $resource = null, $resourceId = null)
+    {
+        $actions = (array) $action;
+        $resource = $this->getResourceObject($resource, $resourceId);
+
+        if ($role = $this->getRoleObject($role)) {
+            $permissions = $this->getRolePermissions($role);
+
+            foreach ($actions as $action) {
+                foreach ($permissions as $key => $permission) {
+                    if ($permission instanceof Privilege && $permission->isAllowed($action, $resource)) {
+                        $this->removeRolePermission($role, $permission);
+                        unset($permissions[$key]);
+                    }
+                }
+
+                $privilege = new Privilege($action, $resource);
+
+                if ($this->hasRolePermission($role, $privilege)) {
+                    $this->removeRolePermission($role, $privilege);
+                }
+
+                $this->storeRolePermission($role, new Restriction($action, $resource));
+            }
+        }
+    }
+
+    /**
+     * Deny a role from doing something
+     *
+     * @param array|\BeatSwitch\Lock\Contracts\Role[] $roles
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param int $resourceId
+     */
+    public function denyRoles(array $roles, $action, $resource = null, $resourceId = null)
+    {
+        foreach ($roles as $role) {
+            $this->denyRole($role, $action, $resource, $resourceId);
+        }
+    }
+
+    /**
      * Determine if an action is allowed
      *
      * @param string $action
      * @param \BeatSwitch\Lock\Contracts\Resource $resource
      * @return bool
      */
-    protected function isAllowed($action, ResourceContract $resource = null)
+    protected function resolvePermissions($action, ResourceContract $resource = null)
     {
         $permissions = $this->getPermissions();
+        $rolePermissions = $this->getRolePermissionsForCaller();
+
+        $callerRestrictionsResult = $this->resolveRestrictions($permissions, $action, $resource);
 
         // Search for restrictions in the permissions. We'll do this first
         // because restrictions should override any privileges.
+        if (! $callerRestrictionsResult) {
+            return false;
+        }
+
+        $rolesRestrictionsResult = $this->resolveRestrictions($rolePermissions, $action, $resource);
+        $callerPrivilegesResult = $this->resolvePrivileges($permissions, $action, $resource);
+
+        // If there are restrictions on the roles but caller specific privileges are set, allow this to pass.
+        if (! $rolesRestrictionsResult && $callerPrivilegesResult) {
+            return true;
+        }
+
+        $rolesPrivilegesResult = $this->resolvePrivileges($rolePermissions, $action, $resource);
+
+        // If no restrictions are found, pass when a privilege is found on either the roles or caller.
+        return $callerPrivilegesResult || $rolesPrivilegesResult;
+    }
+
+    /**
+     * Check if the given restrictions prevent the given action and resource to pass
+     *
+     * @param \BeatSwitch\Lock\Contracts\Permission[] $permissions
+     * @param string $action
+     * @param \BeatSwitch\Lock\Contracts\Resource $resource
+     * @return bool
+     */
+    protected function resolveRestrictions($permissions, $action, ResourceContract $resource)
+    {
         foreach ($permissions as $permission) {
-            // Check if the restriction is valid.
-            if (
-                $permission instanceof Restriction &&
-                $permission->matchesPermission(new Restriction($action, $resource))
-                && ! $permission->isAllowed($action, $resource)
-            ) {
-                // If we've found a matching restriction, set the flag to false.
+            // If we've found a matching restriction, return false.
+            if ($permission instanceof Restriction && ! $permission->isAllowed($action, $resource)) {
                 return false;
             }
         }
 
+        return true;
+    }
+
+    /**
+     * Check if the given privileges allow the given action and resource to pass
+     *
+     * @param \BeatSwitch\Lock\Contracts\Permission[] $permissions
+     * @param string $action
+     * @param \BeatSwitch\Lock\Contracts\Resource $resource
+     * @return bool
+     */
+    protected function resolvePrivileges($permissions, $action, ResourceContract $resource)
+    {
         // Search for privileges in the permissions.
         foreach ($permissions as $permission) {
-            // Check if the privilege is valid.
+            // If we've found a valid privilege, return true.
             if ($permission instanceof Privilege && $permission->isAllowed($action, $resource)) {
-                // If we've found a valid privilege, set the flag to true.
                 return true;
             }
         }
@@ -242,6 +428,92 @@ class Lock
     }
 
     /**
+     * Returns the permissions for the current caller
+     *
+     * @param \BeatSwitch\Lock\Contracts\Role $role
+     * @return \BeatSwitch\Lock\Contracts\Permission[]
+     */
+    protected function getRolePermissions(RoleContract $role)
+    {
+        return $this->driver->getRolePermissions($role);
+    }
+
+    /**
+     * Stores a permission into the driver
+     *
+     * @param \BeatSwitch\Lock\Contracts\Role $role
+     * @param \BeatSwitch\Lock\Contracts\Permission $permission
+     */
+    protected function storeRolePermission(RoleContract $role, Permission $permission)
+    {
+        // Don't re-store the permission if it already exists.
+        if (! $this->hasRolePermission($role, $permission)) {
+            $this->driver->storeRolePermission($role, $permission);
+        }
+    }
+
+    /**
+     * Removes a permission from the driver
+     *
+     * @param \BeatSwitch\Lock\Contracts\Role $role
+     * @param \BeatSwitch\Lock\Contracts\Permission $permission
+     */
+    protected function removeRolePermission(RoleContract $role, Permission $permission)
+    {
+        $this->driver->removeRolePermission($role, $permission);
+    }
+
+    /**
+     * Checks if a caller has a specific permission
+     *
+     * @param \BeatSwitch\Lock\Contracts\Role $role
+     * @param \BeatSwitch\Lock\Contracts\Permission $permission
+     * @return bool
+     */
+    protected function hasRolePermission(RoleContract $role, Permission $permission)
+    {
+        return $this->driver->hasRolePermission($role, $permission);
+    }
+
+    /**
+     * Get the permissions for all the roles from the current caller
+     *
+     * @return \BeatSwitch\Lock\Contracts\Permission[]
+     */
+    protected function getRolePermissionsForCaller()
+    {
+        $roles = $this->caller->getCallerRoles();
+        $permissions = [];
+
+        foreach ($roles as $role) {
+            if ($role = $this->getRoleObject($role)) {if (is_string($role)) die($role);
+                $permissions = array_merge($permissions, $this->getInheritedRolePermissions($role));
+            }
+        }
+
+        return $permissions;
+    }
+
+    /**
+     * Returns all the permissions for a role and their inherited roles
+     *
+     * @param \BeatSwitch\Lock\Contracts\Role $role
+     * @return \BeatSwitch\Lock\Contracts\Permission[]
+     */
+    protected function getInheritedRolePermissions(RoleContract $role)
+    {
+        $permissions = $this->getRolePermissions($role);
+
+        if ($inheritedRole = $role->getInheritedRole()) {
+            $inheritedRole = $this->getRoleObject($inheritedRole);
+
+            $permissions = array_merge($permissions, $this->getInheritedRolePermissions($inheritedRole));
+        }
+
+        return $permissions;
+    }
+
+    /**
      * Returns the identifier for the caller
      *
      * @return bool
@@ -252,28 +524,12 @@ class Lock
     }
 
     /**
-     * Create a resource object if a non resource object is passed
-     *
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
-     * @param int|null $resourceId
-     * @return \BeatSwitch\Lock\Contracts\Resource
-     */
-    protected function resolveResource($resource, $resourceId = null)
-    {
-        if (! $resource instanceof ResourceContract) {
-            return new Resource($resource, $resourceId);
-        }
-
-        return $resource;
-    }
-
-    /**
      * Returns all aliases which contain the given action
      *
      * @param string $action
      * @return array
      */
-    public function getAliasesForAction($action)
+    protected function getAliasesForAction($action)
     {
         $actions = [];
 
@@ -284,6 +540,48 @@ class Lock
         }
 
         return $actions;
+    }
+
+    /**
+     * Create a resource value object if a non resource object is passed
+     *
+     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param int|null $resourceId
+     * @return \BeatSwitch\Lock\Contracts\Resource
+     */
+    protected function getResourceObject($resource, $resourceId = null)
+    {
+        if (! $resource instanceof ResourceContract) {
+            return new Resource($resource, $resourceId);
+        }
+
+        return $resource;
+    }
+
+    /**
+     * Create a role value object if a non role object is passed
+     *
+     * @param string|\BeatSwitch\Lock\Contracts\Role $role
+     * @return \BeatSwitch\Lock\Contracts\Role|null
+     */
+    protected function getRoleObject($role)
+    {
+        return ! $role instanceof RoleContract ? $this->findRole($role) : $role;
+    }
+
+    /**
+     * Find a role in roles array
+     *
+     * @param string $role
+     * @return \BeatSwitch\Lock\Contracts\Role|null
+     */
+    protected function findRole($role)
+    {
+        if (array_key_exists($role, $this->roles)) {
+            return $this->roles[$role];
+        }
+
+        return null;
     }
 
     /**

@@ -1,9 +1,7 @@
 <?php
 namespace BeatSwitch\Lock;
 
-use BeatSwitch\Lock\Contracts\Resource as ResourceContract;
-
-class Resource implements ResourceContract
+class Resource implements Contracts\Resource
 {
     /**
      * @var string|null

@@ -16,13 +16,20 @@ class CallerStub implements Caller
     private $id;
 
     /**
+     * @var array
+     */
+    private $roles;
+
+    /**
      * @param string $type
      * @param int $id
+     * @param array $roles
      */
-    public function __construct($type, $id)
+    public function __construct($type, $id, array $roles = [])
     {
         $this->type = $type;
         $this->id = $id;
+        $this->roles = $roles;
     }
     /**
      * @return string
@@ -40,5 +47,15 @@ class CallerStub implements Caller
     public function getCallerId()
     {
         return $this->id;
+    }
+
+    /**
+     * The caller's roles
+     *
+     * @return array
+     */
+    public function getCallerRoles()
+    {
+        return $this->roles;
     }
 }

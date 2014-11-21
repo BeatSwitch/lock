@@ -65,6 +65,10 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
      */
     final protected function configureLock(Lock $lock)
     {
+        // Set some roles.
+        $lock->setRole('user');
+        $lock->setRoles(['editor', 'admin'], 'user');
+
         // Add an action alias.
         $lock->alias('manage', ['create', 'read', 'update', 'delete']);
 
@@ -88,13 +92,17 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         $lock->allow('all', 'posts');
 
         // Allow to edit this specific event with an ID of 1.
-        $lock->allow('update', new Event(1));
+        $lock->allow(['read', 'update'], new Event(1));
 
         // Set multiple actions at once.
         $lock->allow(['create', 'delete'], 'comments');
 
         // Allow to manage accounts.
         $lock->allow('manage', 'accounts');
+
+        $lock->allowRole('user', 'create', 'pages');
+        $lock->allowRoles(['editor', 'admin'], 'publish', 'pages');
+        $lock->allowRole('admin', 'delete', 'pages');
 
         return $lock;
     }
@@ -139,7 +147,7 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     final function it_succeeds_with_a_valid_action_on_a_resource_object()
     {
         // Note that we're using the same event stub from the makeLock method.
-        $this->assertTrue($this->lock->can('update', new Event(1)));
+        $this->assertTrue($this->lock->can('read', new Event(1)));
     }
 
     /** @test */
@@ -238,5 +246,17 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->lock->can('manage', 'events'));
         $this->assertTrue($this->lock->can('read', 'accounts'));
         $this->assertTrue($this->lock->can(['read', 'update'], 'accounts'));
+    }
+
+
+    /** @test */
+    final function it_can_work_with_roles()
+    {
+        $this->assertTrue($this->lock->can(['create', 'publish'], 'pages'));
+        $this->assertFalse($this->lock->can('delete', 'pages'));
+
+        // If we deny the user from publishing anything afterwards, our role permissions are invalid.
+        $this->lock->deny('publish');
+        $this->assertFalse($this->lock->can(['create', 'publish'], 'pages'));
     }
 }

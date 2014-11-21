@@ -10,7 +10,7 @@ class LockSpec extends ObjectBehavior
 {
     function let()
     {
-        $this->beConstructedWith(new CallerStub('users', 1), new ArrayDriver());
+        $this->beConstructedWith(new CallerStub('users', 1, ['editor']), new ArrayDriver());
     }
 
     function it_is_initializable()
@@ -150,6 +150,20 @@ class LockSpec extends ObjectBehavior
         $this->can('manage', 'events')->shouldReturn(false);
         $this->can('create', 'posts')->shouldReturn(true);
         $this->can(['read', 'update'], 'posts')->shouldReturn(true);
+    }
+
+    function it_can_work_with_roles()
+    {
+        $this->setRole('user');
+        $this->setRoles(['editor', 'admin'], 'user');
+
+        $this->allowRole('user', 'create', 'posts');
+        $this->allowRoles(['editor', 'admin'], 'publish', 'posts');
+        $this->allowRole('admin', 'delete', 'posts');
+
+        // Our CallerStub has the editor role.
+        $this->can(['create', 'publish'], 'posts')->shouldReturn(true);
+        $this->can('delete', 'posts')->shouldReturn(false);
     }
 
     function it_always_returns_false_when_it_is_a_nullcaller()

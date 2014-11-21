@@ -23,4 +23,11 @@ interface Caller
      * @return int
      */
     public function getCallerId();
+
+    /**
+     * The caller's roles
+     *
+     * @return array
+     */
+    public function getCallerRoles();
 }

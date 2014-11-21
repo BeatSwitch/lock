@@ -4,9 +4,10 @@ namespace BeatSwitch\Lock\Drivers;
 use BeatSwitch\Lock\Contracts\Caller;
 use BeatSwitch\Lock\Contracts\Driver;
 use BeatSwitch\Lock\Contracts\Permission;
+use BeatSwitch\Lock\Contracts\Role;
 
 /**
- * The store and delete methods on this driver do nothing
+ * The store and remove methods on this driver do nothing
  * and thus only the get and has methods can be used.
  */
 abstract class ReadOnlyDriver implements Driver
@@ -30,6 +31,28 @@ abstract class ReadOnlyDriver implements Driver
      * @return void
      */
     final public function removePermission(Caller $caller, Permission $permission)
+    {
+    }
+
+    /**
+     * Stores a new permission for a role
+     *
+     * @param \BeatSwitch\Lock\Contracts\Role $role
+     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @return void
+     */
+    final public function storeRolePermission(Role $role, Permission $permission)
+    {
+    }
+
+    /**
+     * Removes a permission for a role
+     *
+     * @param \BeatSwitch\Lock\Contracts\Role $role
+     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @return void
+     */
+    final public function removeRolePermission(Role $role, Permission $permission)
     {
     }
 }
