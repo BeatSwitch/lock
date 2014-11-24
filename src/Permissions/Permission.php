@@ -26,7 +26,7 @@ abstract class Permission implements PermissionContract
      * @param \BeatSwitch\Lock\Contracts\Resource $resource
      * @param \BeatSwitch\Lock\Contracts\Condition[]
      */
-    public function __construct($action, Resource $resource = null, array $conditions = [])
+    public function __construct($action, Resource $resource = null, array $conditions = array())
     {
         $this->action = $action;
         $this->resource = $resource;

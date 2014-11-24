@@ -25,7 +25,7 @@ class CallerStub implements Caller
      * @param int $id
      * @param array $roles
      */
-    public function __construct($type, $id, array $roles = [])
+    public function __construct($type, $id, array $roles = array())
     {
         $this->type = $type;
         $this->id = $id;

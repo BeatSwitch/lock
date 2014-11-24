@@ -56,7 +56,7 @@ trait LockAware
      * @param int $resourceId
      * @param \BeatSwitch\Lock\Contracts\Condition[] $conditions
      */
-    public function allow($action, $resource = null, $resourceId = null, array $conditions = [])
+    public function allow($action, $resource = null, $resourceId = null, array $conditions = array())
     {
         $this->assertLockInstanceIsSet();
 
@@ -71,7 +71,7 @@ trait LockAware
      * @param int $resourceId
      * @param \BeatSwitch\Lock\Contracts\Condition[] $conditions
      */
-    public function deny($action, $resource = null, $resourceId = null, array $conditions = [])
+    public function deny($action, $resource = null, $resourceId = null, array $conditions = array())
     {
         $this->assertLockInstanceIsSet();
 
