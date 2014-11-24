@@ -1,7 +1,6 @@
 <?php
 namespace BeatSwitch\Lock\Tests;
 
-use BeatSwitch\Lock\Lock;
 use BeatSwitch\Lock\Manager;
 use BeatSwitch\Lock\Tests\Stubs\Event;
 use BeatSwitch\Lock\Tests\Stubs\FalseCondition;
