@@ -49,74 +49,18 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         $caller = new User(1);
 
         // Create the lock instance.
-        $lock = $this->manager->caller($caller);
-
-        // Configure the lock instance.
-        $this->lock = $this->configureLock($lock);
+        $this->lock = $this->manager->caller($caller);
 
         // Set the Lock instance on the caller to init the trait functionality.
         $caller->setLock($this->lock);
         $this->caller = $caller;
     }
 
-    /**
-     * The configuration with tests which all driver tests should use
-     *
-     * @param \BeatSwitch\Lock\Lock $lock
-     * @return \BeatSwitch\Lock\Lock
-     */
-    final protected function configureLock(Lock $lock)
-    {
-        // Set some roles.
-        $lock->setRole('user');
-        $lock->setRole(['editor', 'admin'], 'user');
-
-        // Add an action alias.
-        $lock->alias('manage', ['create', 'read', 'update', 'delete']);
-
-        // Allow to create everything.
-        $lock->allow('create');
-
-        // Allow to update everything.
-        $lock->allow('update');
-
-        // Deny to update everything.
-        $lock->deny('update');
-
-        // Allow to delete events.
-        $lock->allow('delete', 'events');
-
-        // Set and remove permission on events.
-        $lock->allow('export', 'events');
-        $lock->deny('export', 'events');
-
-        // Allow to do everything with posts.
-        $lock->allow('all', 'posts');
-
-        // Allow to edit this specific event with an ID of 1.
-        $lock->allow(['read', 'update'], new Event(1));
-
-        // Set multiple actions at once.
-        $lock->allow(['create', 'delete'], 'comments');
-
-        // Allow to manage accounts.
-        $lock->allow('manage', 'accounts');
-
-        // Set some permissions for roles.
-        $lock->allowRole('user', 'create', 'pages');
-        $lock->allowRole(['editor', 'admin'], 'publish', 'pages');
-        $lock->allowRole('admin', 'delete', 'pages');
-
-        // Set some conditions on permissions.
-        $lock->allow('upload', 'files', null, [new TrueCondition()]);
-        $lock->allow('upload', 'photos', null, [new FalseCondition()]);
-
-        return $lock;
-    }
-
     /** @test */
     final function it_succeeds_with_a_valid_action()
     {
+        $this->lock->allow('create');
+
         $this->assertTrue($this->lock->can('create'));
     }
 
@@ -129,6 +73,9 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     /** @test */
     final function it_fails_with_a_denied_action()
     {
+        $this->lock->allow('update');
+        $this->lock->deny('update');
+
         $this->assertFalse($this->lock->can('update'));
     }
 
@@ -141,6 +88,8 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     /** @test */
     final function it_succeeds_with_a_valid_resource_type()
     {
+        $this->lock->allow('delete', 'events');
+
         $this->assertTrue($this->lock->can('delete', 'events'));
     }
 
@@ -153,57 +102,70 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     /** @test */
     final function it_succeeds_with_a_valid_action_on_a_resource_object()
     {
-        // Note that we're using the same event stub from the makeLock method.
+        $this->lock->allow('read', new Event(1));
+
         $this->assertTrue($this->lock->can('read', new Event(1)));
     }
 
     /** @test */
     final function it_fails_with_an_invalid_action_on_a_resource_object()
     {
-        // Note that we're using the same event stub from the makeLock method.
         $this->assertFalse($this->lock->can('edit', new Event(1)));
     }
 
     /** @test */
     final function it_fails_with_a_denied_action_on_a_resource_type()
     {
+        $this->lock->allow('export', 'events');
+        $this->lock->deny('export', 'events');
+
         $this->assertFalse($this->lock->can('export', 'events'));
     }
 
     /** @test */
     final function it_always_succeeds_with_the_all_action()
     {
+        $this->lock->allow('all', 'posts');
+
         $this->assertTrue($this->lock->can('create', 'posts'));
         $this->assertTrue($this->lock->can('update', 'posts'));
         $this->assertTrue($this->lock->can('delete', 'posts'));
+
+        // But we can't just call every action for every resource type.
+        $this->assertFalse($this->lock->can('create', 'events'));
     }
 
     /** @test */
     function it_fails_with_a_denied_action_for_a_resource_type()
     {
+        $this->lock->allow('update', new Event(1));
+
+        // We can't update every event, just the one with an ID of 1.
         $this->assertFalse($this->lock->can('update', 'events'));
     }
 
     /** @test */
     final function it_succeeds_when_overriding_a_denied_action_on_a_resource()
     {
-        // Note that we're using the same event stub from the makeLock method.
+        $this->lock->deny('update');
+        $this->lock->allow('update', new Event(1));
+
         $this->assertTrue($this->lock->can('update', new Event(1)));
     }
 
     /** @test */
     final function it_fails_with_an_incorrect_resource_object()
     {
-        // Note that we're using the same event stub from the makeLock method.
-        $event = new Event(1);
-        $event->id = 2;
+        $this->lock->allow('update', new Event(1));
 
-        $this->assertFalse($this->lock->can('update', $event));
+        $this->assertFalse($this->lock->can('update', new Event(2)));
     }
 
     /** @test */
     final function it_can_check_multiple_permissions_at_once()
     {
+        $this->lock->allow(['create', 'delete'], 'comments');
+
         $this->assertTrue($this->lock->can(['create', 'delete'], 'comments'));
         $this->assertTrue($this->lock->cannot(['create', 'edit'], 'comments'));
     }
@@ -221,6 +183,8 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     /** @test */
     final function it_can_toggle_multiple_permissions_at_once()
     {
+        $this->lock->allow(['create', 'delete'], 'comments');
+
         $this->lock->toggle(['create', 'delete'], 'comments');
         $this->assertFalse($this->lock->can(['create', 'delete'], 'comments'));
 
@@ -231,14 +195,12 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     /** @test */
     final function the_caller_can_call_the_caller_trait_methods()
     {
+        $this->caller->allow('create');
+
         $this->assertTrue($this->caller->can('create'));
-        $this->assertTrue($this->caller->cannot('update'));
 
-        $this->caller->allow('update');
-        $this->assertTrue($this->caller->can('update'));
-
-        $this->caller->deny('update');
-        $this->assertFalse($this->caller->can('update'));
+        $this->caller->deny('create');
+        $this->assertFalse($this->caller->can('create'));
 
         $this->caller->toggle('update');
         $this->assertTrue($this->caller->can('update'));
@@ -247,6 +209,9 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     /** @test */
     final function it_can_check_actions_from_aliases()
     {
+        $this->lock->alias('manage', ['create', 'read', 'update', 'delete']);
+        $this->lock->allow('manage', 'accounts');
+
         $this->assertFalse($this->lock->can('manage'));
         $this->assertTrue($this->lock->can('manage', 'accounts'));
         $this->assertTrue($this->lock->can('manage', 'accounts', 1));
@@ -258,6 +223,13 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     /** @test */
     final function it_can_work_with_roles()
     {
+        $this->lock->setRole('user');
+        $this->lock->setRole(['editor', 'admin'], 'user');
+
+        $this->lock->allowRole('user', 'create', 'pages');
+        $this->lock->allowRole(['editor', 'admin'], 'publish', 'pages');
+        $this->lock->allowRole('admin', 'delete', 'pages');
+
         $this->assertTrue($this->lock->can(['create', 'publish'], 'pages'));
         $this->assertFalse($this->lock->can('delete', 'pages'));
 
@@ -269,6 +241,9 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     /** @test */
     final function it_can_work_with_conditions()
     {
+        $this->lock->allow('upload', 'files', null, [new TrueCondition()]);
+        $this->lock->allow('upload', 'photos', null, [new FalseCondition()]);
+
         $this->assertTrue($this->lock->can('upload', 'files'));
         $this->assertFalse($this->lock->can('upload', 'photos'));
     }
