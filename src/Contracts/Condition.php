@@ -1,6 +1,10 @@
 <?php
 namespace BeatSwitch\Lock\Contracts;
 
+/**
+ * A contract to define a permission condition. Conditions need to give
+ * back a true value if a permission is to succeed.
+ */
 interface Condition
 {
     /**

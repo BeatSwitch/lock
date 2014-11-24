@@ -1,5 +1,6 @@
 <?php
 namespace BeatSwitch\Lock\Permissions;
+
 use BeatSwitch\Lock\Contracts\Resource;
 
 /**
