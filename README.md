@@ -40,7 +40,7 @@ Made possible thanks to [BeatSwitch](https://beatswitch.com). Inspired by [Autho
 
 ## Terminology
 
-- `Caller`: On identity object that can have permissions to do something
+- `Caller`: An identity object that can have permissions to do something
 - `Driver`: A storage system for permissions which can either be static or persistent
 - `Permission`: A permission holds an action and an optional (unique) resource. Can be either a `Restriction` or a `Privilege`
 - `Restriction`: A restriction denies you from being able to perform an action (on an optional resource)
@@ -518,13 +518,23 @@ toggle(
 
 Add an alias for one or more actions.
 
-`alias($name, $actions)`
+```
+alias(
+    string $name,
+    string|array $actions
+)
+```
 
 ### setRole
 
 Set one or more roles and an optional role to inherit permissions from.
 
-`setRole(string|array $name, string $inherit = null)`
+```
+setRole(
+    string|array $name,
+    string $inherit = null
+)
+```
 
 ### allowRole
 
