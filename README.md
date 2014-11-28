@@ -13,7 +13,7 @@ Made possible thanks to [BeatSwitch](https://beatswitch.com). Inspired by [Autho
 
 [Come work with us at BeatSwitch!](http://creativeskills.be/jobs/php-development/php-developer-beatswitch-14-10-14.html)
 
-> **Warning:** This package is currently in alpha stage. This means that there is no guaranty that the current structure, contracts, terminology an/or implementations will stay the same until the package hits stable. Please do not use this in production until a stable release it out.
+> **Warning:** This package is currently in alpha stage. This means that there is no guarantee that the current structure, contracts, terminology and/or implementations will stay the same until the package hits stable. Please do not use this in production until a stable release it out.
 
 ## Table of Contents
 
