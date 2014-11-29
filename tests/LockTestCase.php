@@ -205,7 +205,12 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->caller->can('update'));
     }
 
-    /** @test */
+    /**
+     * @test
+     *
+     * @todo Verify if the last assert of the "manage" action is the expected behavior
+     * @todo Fix this test
+     */
     final function it_can_check_actions_from_aliases()
     {
         $this->lock->alias('manage', ['create', 'read', 'update', 'delete']);
@@ -217,6 +222,13 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->lock->can('manage', 'events'));
         $this->assertTrue($this->lock->can('read', 'accounts'));
         $this->assertTrue($this->lock->can(['read', 'update'], 'accounts'));
+
+        // If one of the aliased actions is explicitly denied, it cannot pass anymore.
+        $this->lock->deny('create');
+
+        $this->assertFalse($this->lock->can('manage', 'accounts'));
+        $this->assertFalse($this->lock->can('create', 'accounts'));
+        $this->assertTrue($this->lock->can(['read', 'update', 'delete'], 'accounts'));
     }
 
     /** @test */
