@@ -1,12 +1,13 @@
 <?php
 namespace BeatSwitch\Lock\Permissions;
 
+use BeatSwitch\Lock\Contracts\Permission;
 use BeatSwitch\Lock\Contracts\Resource;
 
 /**
  * A restriction is placed when you deny a caller something
  */
-class Restriction extends Permission
+class Restriction extends AbstractPermission implements Permission
 {
     /** @var string */
     const TYPE = 'restriction';

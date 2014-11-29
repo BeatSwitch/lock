@@ -1,10 +1,10 @@
 <?php
 namespace BeatSwitch\Lock\Permissions;
 
-use BeatSwitch\Lock\Contracts\Permission as PermissionContract;
+use BeatSwitch\Lock\Contracts\Permission;
 use BeatSwitch\Lock\Contracts\Resource;
 
-abstract class Permission implements PermissionContract
+abstract class AbstractPermission
 {
     /**
      * @var string
@@ -39,7 +39,7 @@ abstract class Permission implements PermissionContract
      * @param \BeatSwitch\Lock\Contracts\Permission $permission
      * @return bool
      */
-    public function matchesPermission(PermissionContract $permission)
+    public function matchesPermission(Permission $permission)
     {
         return (
             $this instanceof $permission &&

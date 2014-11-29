@@ -1,12 +1,13 @@
 <?php
 namespace BeatSwitch\Lock\Permissions;
 
+use BeatSwitch\Lock\Contracts\Permission;
 use BeatSwitch\Lock\Contracts\Resource;
 
 /**
  * A privilege is placed when you allow a caller something
  */
-class Privilege extends Permission
+class Privilege extends AbstractPermission implements Permission
 {
     /** @var string */
     const TYPE = 'privilege';
