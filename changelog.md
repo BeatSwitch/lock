@@ -27,6 +27,4 @@ All notable changes to Lock will be documented in this file.
 
 ## 1.0.0-alpha.1 - 2014-11-21
 
-### Added
-
-- First public alpha release
+First public alpha release.
