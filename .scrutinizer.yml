@@ -3,6 +3,10 @@ filter:
   excluded_paths: [spec/*, tests/*]
 tools:
   php_analyzer: true
+  php_code_sniffer:
+    config:
+      standard:
+        "PSR2"
 checks:
   php:
     code_rating: true
