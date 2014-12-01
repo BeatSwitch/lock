@@ -10,6 +10,7 @@ Please make sure to follow these rules when creating a pull request.
 - Write tests for new functionality or bug fixes
 - Keep the [readme.md](readme.md) file and documentation up-to-date with changes
 - We follow [Semantic Versioning](http://semver.org/) so please send pull requests to the correct branch
+- Update the [changelog.md](changelog.md) file with any updates and follow [the changelog standards](http://keepachangelog.com/)
 
 ## Running Tests
 

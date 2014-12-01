@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Lock will be documented in this file.
+All notable changes to Lock will be documented in this file. This file follows the *[Keep a CHANGELOG](http://keepachangelog.com/)* standards.
 
 ## Unreleased
 
