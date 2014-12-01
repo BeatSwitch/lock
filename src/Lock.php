@@ -454,7 +454,7 @@ class Lock
         $permissions = [];
 
         foreach ($roles as $role) {
-            if ($role = $this->getRoleObject($role)) {if (is_string($role)) die($role);
+            if ($role = $this->getRoleObject($role)) {
                 $permissions = array_merge($permissions, $this->getInheritedRolePermissions($role));
             }
         }
