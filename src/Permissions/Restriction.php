@@ -16,7 +16,7 @@ class Restriction extends AbstractPermission implements Permission
      * Validate a permission against the given params
      *
      * @param string $action
-     * @param \BeatSwitch\Lock\Contracts\Resource $resource
+     * @param \BeatSwitch\Lock\Contracts\Resource|null $resource
      * @return bool
      */
     public function isAllowed($action, Resource $resource = null)

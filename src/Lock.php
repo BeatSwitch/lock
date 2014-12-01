@@ -274,7 +274,7 @@ class Lock
      * @param \BeatSwitch\Lock\Contracts\Resource $resource
      * @return bool
      */
-    protected function resolvePermissions($action, ResourceContract $resource = null)
+    protected function resolvePermissions($action, ResourceContract $resource)
     {
         $permissions = $this->getPermissions();
         $rolePermissions = $this->getRolePermissionsForCaller();
@@ -513,7 +513,7 @@ class Lock
     /**
      * Create a resource value object if a non resource object is passed
      *
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param string|\BeatSwitch\Lock\Contracts\Resource|null $resource
      * @param int|null $resourceId
      * @return \BeatSwitch\Lock\Contracts\Resource
      */

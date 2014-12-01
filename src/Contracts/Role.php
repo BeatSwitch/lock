@@ -13,7 +13,7 @@ interface Role
     /**
      * The name for the role from which this role inherits permissions
      *
-     * @return \BeatSwitch\Lock\Role|null
+     * @return string|null
      */
     public function getInheritedRole();
 }

@@ -10,10 +10,10 @@ class TrueCondition implements Condition
      * Assert if the condition is correct
      *
      * @param string $action
-     * @param \BeatSwitch\Lock\Contracts\Resource $resource
+     * @param \BeatSwitch\Lock\Contracts\Resource|null $resource
      * @return bool
      */
-    public function assert($action, Resource $resource)
+    public function assert($action, Resource $resource = null)
     {
         return true;
     }

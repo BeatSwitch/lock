@@ -23,7 +23,7 @@ abstract class AbstractPermission
 
     /**
      * @param string $action
-     * @param \BeatSwitch\Lock\Contracts\Resource $resource
+     * @param \BeatSwitch\Lock\Contracts\Resource|null $resource
      * @param \BeatSwitch\Lock\Contracts\Condition[]
      */
     public function __construct($action, Resource $resource = null, array $conditions = array())
@@ -52,13 +52,13 @@ abstract class AbstractPermission
      * Validate a permission against the given params.
      *
      * @param string $action
-     * @param \BeatSwitch\Lock\Contracts\Resource $resource
+     * @param \BeatSwitch\Lock\Contracts\Resource|null $resource
      * @return bool
      */
     protected function resolve($action, Resource $resource = null)
     {
         // If no resource was set for this permission we'll only need to check the action.
-        if ($this->resource === null || $this->resource->getResourceType() === null) {
+        if ($this->resource === null || $this->resource->getResourceType() === null || $resource === null) {
             return $this->matchesAction($action) && $this->resolveConditions();
         }
 
@@ -90,10 +90,10 @@ abstract class AbstractPermission
     /**
      * Validate the resource
      *
-     * @param \BeatSwitch\Lock\Contracts\Resource|null $resource
+     * @param \BeatSwitch\Lock\Contracts\Resource $resource
      * @return bool
      */
-    protected function matchesResource($resource)
+    protected function matchesResource(Resource $resource)
     {
         // If the permission's resource id is null then all resources with a specific ID are accepted.
         if ($this->getResourceId() === null) {
