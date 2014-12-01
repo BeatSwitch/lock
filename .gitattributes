@@ -8,5 +8,5 @@
 /.travis.yml export-ignore
 /phpspec.yml export-ignore
 /phpunit.xml export-ignore
-/CONTRIBUTING.md export-ignore
-/README.md export-ignore
+/contributing.md export-ignore
+/readme.md export-ignore
