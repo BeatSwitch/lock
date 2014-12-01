@@ -37,6 +37,8 @@ Made possible thanks to [BeatSwitch](https://beatswitch.com). Inspired by [Autho
 - [Api](#api)
 - [Building a Driver](#building-a-driver)
 - [Maintainer](#maintainer)
+- [Contributing](#contributing)
+- [Changelog](#changelog)
 - [License](#license)
 
 ## Terminology
@@ -743,9 +745,17 @@ Now we have a driver which supports storing of permissions for callers and roles
 
 ## Maintainer
 
-This package is currently maintained by [Dries Vints](https://github.com/driesvints).
-If you have any questions please don't hesitate to ask them in an issue.
+This package is currently maintained by [Dries Vints](https://github.com/driesvints).  
+If you have any questions please don't hesitate to [ask them in an issue](https://github.com/BeatSwitch/lock/issues/new).
+
+## Contributing
+
+Please see [the contributing file](contributing.md) for details.
+
+## Changelog
+
+You can see a list of changes for each release in [our changelog file](changelog.md).
 
 ## License
 
-The MIT License (MIT). Please see [the License File](license.md) for more information.
+The MIT License (MIT). Please see [the license file](license.md) for more information.
