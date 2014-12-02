@@ -1,7 +1,8 @@
 <?php
-namespace tests\BeatSwitch\Lock;
+namespace tests\BeatSwitch\Lock\Drivers;
 
 use BeatSwitch\Lock\Drivers\ArrayDriver;
+use tests\BeatSwitch\Lock\LockTestCase;
 
 class ArrayDriverTest extends LockTestCase
 {
