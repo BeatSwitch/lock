@@ -1,6 +1,7 @@
 * text=auto
 
 /spec export-ingore
+/stubs export-ignore
 /tests export-ignore
 /.gitattributes export-ignore
 /.gitignore export-ignore
@@ -8,5 +9,6 @@
 /.travis.yml export-ignore
 /phpspec.yml export-ignore
 /phpunit.xml export-ignore
+/changelog.md export-ignore
 /contributing.md export-ignore
 /readme.md export-ignore
