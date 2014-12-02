@@ -1,11 +1,11 @@
 <?php
-namespace BeatSwitch\Lock\Tests;
+namespace tests\BeatSwitch\Lock;
 
 use BeatSwitch\Lock\Manager;
-use BeatSwitch\Lock\Tests\Stubs\Event;
-use BeatSwitch\Lock\Tests\Stubs\FalseCondition;
-use BeatSwitch\Lock\Tests\Stubs\TrueCondition;
-use BeatSwitch\Lock\Tests\Stubs\User;
+use BeatSwitch\Lock\Resource;
+use stubs\BeatSwitch\Lock\CallerStub;
+use stubs\BeatSwitch\Lock\FalseConditionStub;
+use stubs\BeatSwitch\Lock\TrueConditionStub;
 
 abstract class LockTestCase extends \PHPUnit_Framework_TestCase
 {
@@ -26,7 +26,7 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     /**
      * The caller used to instantiate the main Lock instance
      *
-     * @var \BeatSwitch\Lock\Tests\Stubs\User
+     * @var \BeatSwitch\Lock\Contracts\Caller
      */
     protected $caller;
 
@@ -45,7 +45,7 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         $this->manager = new Manager($this->driver);
 
         // Init the caller.
-        $caller = new User(1);
+        $caller = new CallerStub('users', 1, ['editor']);
 
         // Create the lock instance.
         $this->lock = $this->manager->caller($caller);
@@ -101,15 +101,15 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     /** @test */
     final function it_succeeds_with_a_valid_action_on_a_resource_object()
     {
-        $this->lock->allow('read', new Event(1));
-
-        $this->assertTrue($this->lock->can('read', new Event(1)));
+        $event = new Resource('events', 1);
+        $this->lock->allow('read', $event);
+        $this->assertTrue($this->lock->can('read', $event));
     }
 
     /** @test */
     final function it_fails_with_an_invalid_action_on_a_resource_object()
     {
-        $this->assertFalse($this->lock->can('edit', new Event(1)));
+        $this->assertFalse($this->lock->can('edit', new Resource('events', 1)));
     }
 
     /** @test */
@@ -137,7 +137,7 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     /** @test */
     function it_fails_with_a_denied_action_for_a_resource_type()
     {
-        $this->lock->allow('update', new Event(1));
+        $this->lock->allow('update', new Resource('events', 1));
 
         // We can't update every event, just the one with an ID of 1.
         $this->assertFalse($this->lock->can('update', 'events'));
@@ -146,18 +146,19 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     /** @test */
     final function it_succeeds_when_overriding_a_denied_action_on_a_resource()
     {
-        $this->lock->deny('update');
-        $this->lock->allow('update', new Event(1));
+        $stub = new Resource('events', 1);
 
-        $this->assertTrue($this->lock->can('update', new Event(1)));
+        $this->lock->deny('update');
+        $this->lock->allow('update', $stub);
+
+        $this->assertTrue($this->lock->can('update', $stub));
     }
 
     /** @test */
     final function it_fails_with_an_incorrect_resource_object()
     {
-        $this->lock->allow('update', new Event(1));
-
-        $this->assertFalse($this->lock->can('update', new Event(2)));
+        $this->lock->allow('update', new Resource('events', 1));
+        $this->assertFalse($this->lock->can('update', new Resource('events', 2)));
     }
 
     /** @test */
@@ -252,8 +253,8 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     /** @test */
     final function it_can_work_with_conditions()
     {
-        $this->lock->allow('upload', 'files', null, [new TrueCondition()]);
-        $this->lock->allow('upload', 'photos', null, [new FalseCondition()]);
+        $this->lock->allow('upload', 'files', null, [new TrueConditionStub()]);
+        $this->lock->allow('upload', 'photos', null, [new FalseConditionStub()]);
 
         $this->assertTrue($this->lock->can('upload', 'files'));
         $this->assertFalse($this->lock->can('upload', 'photos'));

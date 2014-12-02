@@ -1,10 +1,10 @@
 <?php
-namespace spec\BeatSwitch\Lock\Stubs;
+namespace stubs\BeatSwitch\Lock;
 
 use BeatSwitch\Lock\Contracts\Condition;
 use BeatSwitch\Lock\Contracts\Resource;
 
-class FalseCondition implements Condition
+class FalseConditionStub implements Condition
 {
     /**
      * Assert if the condition is correct

@@ -1,10 +1,13 @@
 <?php
-namespace spec\BeatSwitch\Lock\Stubs;
+namespace stubs\BeatSwitch\Lock;
 
 use BeatSwitch\Lock\Contracts\Caller;
+use BeatSwitch\Lock\LockAware;
 
 class CallerStub implements Caller
 {
+    use LockAware;
+
     /**
      * @var int
      */
@@ -25,7 +28,7 @@ class CallerStub implements Caller
      * @param int $id
      * @param array $roles
      */
-    public function __construct($type, $id, array $roles = array())
+    public function __construct($type, $id, array $roles = [])
     {
         $this->type = $type;
         $this->id = $id;

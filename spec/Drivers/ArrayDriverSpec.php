@@ -1,13 +1,14 @@
 <?php
 namespace spec\BeatSwitch\Lock\Drivers;
 
-require __DIR__ . '/../Stubs/CallerStub.php';
+// Import stubs
+require_once __DIR__ . '/../../stubs/CallerStub.php';
 
 use BeatSwitch\Lock\Permissions\Privilege;
 use BeatSwitch\Lock\Resource;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use spec\BeatSwitch\Lock\Stubs\CallerStub;
+use stubs\BeatSwitch\Lock\CallerStub;
 
 class ArrayDriverSpec extends ObjectBehavior
 {

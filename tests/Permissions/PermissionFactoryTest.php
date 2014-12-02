@@ -1,5 +1,5 @@
 <?php
-namespace BeatSwitch\Lock\Tests\Permissions;
+namespace tests\BeatSwitch\Lock\Permissions;
 
 use BeatSwitch\Lock\Permissions\PermissionFactory;
 

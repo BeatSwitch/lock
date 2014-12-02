@@ -1,12 +1,9 @@
 <?php
 namespace spec\BeatSwitch\Lock\Permissions;
 
-require __DIR__ . '/../Stubs/ResourceStub.php';
-
 use BeatSwitch\Lock\Resource;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use spec\BeatSwitch\Lock\Stubs\ResourceStub;
 
 class PrivilegeSpec extends ObjectBehavior
 {
@@ -24,7 +21,7 @@ class PrivilegeSpec extends ObjectBehavior
     function it_can_validate_itself_against_parameters()
     {
         $this->isAllowed('edit', new Resource('events', 1))->shouldReturn(true);
-        $this->isAllowed('edit', new ResourceStub('events', 1))->shouldReturn(true);
+        $this->isAllowed('edit', new Resource('events', 1))->shouldReturn(true);
         $this->isAllowed('edit', new Resource('events', 2))->shouldReturn(false);
         $this->isAllowed('delete', new Resource('comments', 1))->shouldReturn(false);
     }

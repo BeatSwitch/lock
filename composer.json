@@ -34,7 +34,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "BeatSwitch\\Lock\\Tests\\": "tests/"
+            "stubs\\BeatSwitch\\Lock\\": "stubs/",
+            "tests\\BeatSwitch\\Lock\\": "tests/"
         }
     }
 }

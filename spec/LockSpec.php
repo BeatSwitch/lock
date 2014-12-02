@@ -1,16 +1,17 @@
 <?php
 namespace spec\BeatSwitch\Lock;
 
-// For some bizar reason it can find the CallerStub but not the rest of the stubs.
-require __DIR__ . '/Stubs/TrueCondition.php';
-require __DIR__ . '/Stubs/FalseCondition.php';
+// Import stubs
+require_once __DIR__ . '/../stubs/CallerStub.php';
+require_once __DIR__ . '/../stubs/FalseConditionStub.php';
+require_once __DIR__ . '/../stubs/TrueConditionStub.php';
 
 use BeatSwitch\Lock\Drivers\ArrayDriver;
 use BeatSwitch\Lock\Callers\NullCaller;
 use PhpSpec\ObjectBehavior;
-use spec\BeatSwitch\Lock\Stubs\CallerStub;
-use spec\BeatSwitch\Lock\Stubs\FalseCondition;
-use spec\BeatSwitch\Lock\Stubs\TrueCondition;
+use stubs\BeatSwitch\Lock\CallerStub;
+use stubs\BeatSwitch\Lock\FalseConditionStub;
+use stubs\BeatSwitch\Lock\TrueConditionStub;
 
 class LockSpec extends ObjectBehavior
 {
@@ -99,8 +100,8 @@ class LockSpec extends ObjectBehavior
 
     function it_can_work_with_permission_conditions()
     {
-        $this->allow('create', 'posts', null, [new TrueCondition()]);
-        $this->allow('create', 'pages', null, [new FalseCondition()]);
+        $this->allow('create', 'posts', null, [new TrueConditionStub()]);
+        $this->allow('create', 'pages', null, [new FalseConditionStub()]);
 
         $this->can('create', 'posts')->shouldReturn(true);
         $this->can('create', 'pages')->shouldReturn(false);

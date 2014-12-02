@@ -1,6 +1,6 @@
 filter:
   paths: [src/*]
-  excluded_paths: [spec/*, tests/*]
+  excluded_paths: [spec/*, tests/*, stubs/*]
 tools:
   php_analyzer: true
   php_code_sniffer:

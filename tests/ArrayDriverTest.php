@@ -1,5 +1,5 @@
 <?php
-namespace BeatSwitch\Lock\Tests;
+namespace tests\BeatSwitch\Lock;
 
 use BeatSwitch\Lock\Drivers\ArrayDriver;
 

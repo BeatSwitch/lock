@@ -1,10 +1,13 @@
 <?php
 namespace spec\BeatSwitch\Lock;
 
+// Import stubs
+require_once __DIR__ . '/../stubs/CallerStub.php';
+
 use BeatSwitch\Lock\Contracts\Driver;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use spec\BeatSwitch\Lock\Stubs\CallerStub;
+use stubs\BeatSwitch\Lock\CallerStub;
 
 class ManagerSpec extends ObjectBehavior
 {
