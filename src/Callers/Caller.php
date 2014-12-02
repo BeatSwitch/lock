@@ -1,5 +1,5 @@
 <?php
-namespace BeatSwitch\Lock\Contracts;
+namespace BeatSwitch\Lock\Callers;
 
 /**
  * A contract to identify a permission caller which can have permissions to do something

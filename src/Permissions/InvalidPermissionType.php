@@ -1,5 +1,5 @@
 <?php
-namespace BeatSwitch\Lock\Exceptions;
+namespace BeatSwitch\Lock\Permissions;
 
 class InvalidPermissionType extends \Exception
 {

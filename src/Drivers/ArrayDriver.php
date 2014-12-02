@@ -1,10 +1,9 @@
 <?php
 namespace BeatSwitch\Lock\Drivers;
 
-use BeatSwitch\Lock\Contracts\Caller;
-use BeatSwitch\Lock\Contracts\Driver;
-use BeatSwitch\Lock\Contracts\Permission;
-use BeatSwitch\Lock\Contracts\Role;
+use BeatSwitch\Lock\Callers\Caller;
+use BeatSwitch\Lock\Permissions\Permission;
+use BeatSwitch\Lock\Roles\Role;
 
 /**
  * A static in-memory driver
@@ -21,8 +20,8 @@ class ArrayDriver implements Driver
     /**
      * Returns all the permissions for a caller
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @return \BeatSwitch\Lock\Contracts\Permission[]
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
     public function getPermissions(Caller $caller)
     {
@@ -34,8 +33,8 @@ class ArrayDriver implements Driver
     /**
      * Stores a new permission into the driver for a caller
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
     public function storePermission(Caller $caller, Permission $permission)
@@ -46,8 +45,8 @@ class ArrayDriver implements Driver
     /**
      * Removes a permission from the driver for a caller
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
     public function removePermission(Caller $caller, Permission $permission)
@@ -65,8 +64,8 @@ class ArrayDriver implements Driver
     /**
      * Checks if a permission is stored for a user
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return bool
      */
     public function hasPermission(Caller $caller, Permission $permission)
@@ -85,8 +84,8 @@ class ArrayDriver implements Driver
     /**
      * Returns all the permissions for a role
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @return \BeatSwitch\Lock\Contracts\Permission[]
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
     public function getRolePermissions(Role $role)
     {
@@ -98,8 +97,8 @@ class ArrayDriver implements Driver
     /**
      * Stores a new permission for a role
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
     public function storeRolePermission(Role $role, Permission $permission)
@@ -110,8 +109,8 @@ class ArrayDriver implements Driver
     /**
      * Removes a permission for a role
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
     public function removeRolePermission(Role $role, Permission $permission)
@@ -129,8 +128,8 @@ class ArrayDriver implements Driver
     /**
      * Checks if a permission is stored for a role
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return bool
      */
     public function hasRolePermission(Role $role, Permission $permission)
@@ -149,7 +148,7 @@ class ArrayDriver implements Driver
     /**
      * Creates a key to store the caller's permissions
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
      * @return string
      */
     private function getCallerKey(Caller $caller)
@@ -160,7 +159,7 @@ class ArrayDriver implements Driver
     /**
      * Creates a key to store the role's permissions
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
+     * @param \BeatSwitch\Lock\Roles\Role $role
      * @return string
      */
     private function getRoleKey(Role $role)

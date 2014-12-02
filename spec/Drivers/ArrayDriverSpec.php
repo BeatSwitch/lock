@@ -13,7 +13,7 @@ use stubs\BeatSwitch\Lock\CallerStub;
 class ArrayDriverSpec extends ObjectBehavior
 {
     /**
-     * @var \BeatSwitch\Lock\Contracts\Caller
+     * @var \BeatSwitch\Lock\Callers\Caller
      */
     protected $caller;
 
@@ -29,7 +29,7 @@ class ArrayDriverSpec extends ObjectBehavior
     function it_is_initializable()
     {
         $this->shouldHaveType('BeatSwitch\Lock\Drivers\ArrayDriver');
-        $this->shouldImplement('BeatSwitch\Lock\Contracts\Driver');
+        $this->shouldImplement('BeatSwitch\Lock\Drivers\Driver');
     }
 
     function it_returns_permissions()

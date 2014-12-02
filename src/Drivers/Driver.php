@@ -1,5 +1,9 @@
 <?php
-namespace BeatSwitch\Lock\Contracts;
+namespace BeatSwitch\Lock\Drivers;
+
+use BeatSwitch\Lock\Callers\Caller;
+use BeatSwitch\Lock\Permissions\Permission;
+use BeatSwitch\Lock\Roles\Role;
 
 /**
  * A contract to identify an implementation to store permissions to
@@ -12,16 +16,16 @@ interface Driver
     /**
      * Returns all the permissions for a caller
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @return \BeatSwitch\Lock\Contracts\Permission[]
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
     public function getPermissions(Caller $caller);
 
     /**
      * Stores a new permission for a caller
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
     public function storePermission(Caller $caller, Permission $permission);
@@ -29,8 +33,8 @@ interface Driver
     /**
      * Removes a permission for a caller
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
     public function removePermission(Caller $caller, Permission $permission);
@@ -38,8 +42,8 @@ interface Driver
     /**
      * Checks if a permission is stored for a caller
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return bool
      */
     public function hasPermission(Caller $caller, Permission $permission);
@@ -47,16 +51,16 @@ interface Driver
     /**
      * Returns all the permissions for a role
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @return \BeatSwitch\Lock\Contracts\Permission[]
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
     public function getRolePermissions(Role $role);
 
     /**
      * Stores a new permission for a role
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
     public function storeRolePermission(Role $role, Permission $permission);
@@ -64,8 +68,8 @@ interface Driver
     /**
      * Removes a permission for a role
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
     public function removeRolePermission(Role $role, Permission $permission);
@@ -73,8 +77,8 @@ interface Driver
     /**
      * Checks if a permission is stored for a role
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return bool
      */
     public function hasRolePermission(Role $role, Permission $permission);

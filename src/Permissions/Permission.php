@@ -1,5 +1,7 @@
 <?php
-namespace BeatSwitch\Lock\Contracts;
+namespace BeatSwitch\Lock\Permissions;
+
+use BeatSwitch\Lock\Resources\Resource;
 
 /**
  * A contract to define a permission rule, either a restriction or a privilege
@@ -10,7 +12,7 @@ interface Permission
      * Validate a permission against the given params
      *
      * @param string $action
-     * @param \BeatSwitch\Lock\Contracts\Resource|null $resource
+     * @param \BeatSwitch\Lock\Resources\Resource|null $resource
      * @return bool
      */
     public function isAllowed($action, Resource $resource = null);
@@ -18,7 +20,7 @@ interface Permission
     /**
      * Determine if a permission exactly matches the current instance
      *
-     * @param \BeatSwitch\Lock\Contracts\Permission $permission
+     * @param \BeatSwitch\Lock\Permissions\Permission $permission
      * @return bool
      */
     public function matchesPermission(Permission $permission);
@@ -40,7 +42,7 @@ interface Permission
     /**
      * The optional resource an action should be checked on
      *
-     * @return \BeatSwitch\Lock\Contracts\Resource|null
+     * @return \BeatSwitch\Lock\Resources\Resource|null
      */
     public function getResource();
 

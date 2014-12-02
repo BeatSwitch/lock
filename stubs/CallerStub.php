@@ -1,7 +1,7 @@
 <?php
 namespace stubs\BeatSwitch\Lock;
 
-use BeatSwitch\Lock\Contracts\Caller;
+use BeatSwitch\Lock\Callers\Caller;
 use BeatSwitch\Lock\LockAware;
 
 class CallerStub implements Caller

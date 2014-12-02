@@ -1,7 +1,7 @@
 <?php
 namespace BeatSwitch\Lock;
 
-class Role implements Contracts\Role
+class Role implements Roles\Role
 {
     /**
      * @var string

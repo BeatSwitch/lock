@@ -15,14 +15,14 @@ class PermissionFactoryTest extends \PHPUnit_Framework_TestCase
 
         $result = PermissionFactory::createFromArray($data);
 
-        $this->assertContainsOnlyInstancesOf('BeatSwitch\Lock\Contracts\Permission', $result);
+        $this->assertContainsOnlyInstancesOf('BeatSwitch\Lock\Permissions\Permission', $result);
     }
 
     /** @test */
     function it_throws_an_exception_for_an_incorrect_permission_type()
     {
         $this->setExpectedException(
-            'BeatSwitch\Lock\Exceptions\InvalidPermissionType',
+            'BeatSwitch\Lock\Permissions\InvalidPermissionType',
             'The permission type you provided "something" is incorrect.'
         );
 

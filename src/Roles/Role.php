@@ -1,5 +1,5 @@
 <?php
-namespace BeatSwitch\Lock\Contracts;
+namespace BeatSwitch\Lock\Roles;
 
 interface Role
 {

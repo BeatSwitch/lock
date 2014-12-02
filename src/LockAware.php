@@ -22,7 +22,7 @@ trait LockAware
      * Determine if one or more actions are allowed
      *
      * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
      * @return bool
      */
@@ -37,7 +37,7 @@ trait LockAware
      * Determine if an action isn't allowed
      *
      * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
      * @return bool
      */
@@ -52,9 +52,9 @@ trait LockAware
      * Give a caller permission to do something
      *
      * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
-     * @param \BeatSwitch\Lock\Contracts\Condition[] $conditions
+     * @param \BeatSwitch\Lock\Permissions\Condition[] $conditions
      */
     public function allow($action, $resource = null, $resourceId = null, array $conditions = array())
     {
@@ -67,9 +67,9 @@ trait LockAware
      * Deny a caller from doing something
      *
      * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
-     * @param \BeatSwitch\Lock\Contracts\Condition[] $conditions
+     * @param \BeatSwitch\Lock\Permissions\Condition[] $conditions
      */
     public function deny($action, $resource = null, $resourceId = null, array $conditions = array())
     {
@@ -82,7 +82,7 @@ trait LockAware
      * Change the value for a permission
      *
      * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
      */
     public function toggle($action, $resource = null, $resourceId = null)

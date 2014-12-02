@@ -1,10 +1,9 @@
 <?php
 namespace BeatSwitch\Lock\Drivers;
 
-use BeatSwitch\Lock\Contracts\Caller;
-use BeatSwitch\Lock\Contracts\Driver;
-use BeatSwitch\Lock\Contracts\Permission;
-use BeatSwitch\Lock\Contracts\Role;
+use BeatSwitch\Lock\Callers\Caller;
+use BeatSwitch\Lock\Permissions\Permission;
+use BeatSwitch\Lock\Roles\Role;
 
 /**
  * The store and remove methods on this driver do nothing
@@ -15,8 +14,8 @@ abstract class ReadOnlyDriver implements Driver
     /**
      * Stores a new permission into the driver for a caller
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
     final public function storePermission(Caller $caller, Permission $permission)
@@ -26,8 +25,8 @@ abstract class ReadOnlyDriver implements Driver
     /**
      * Removes a permission from the driver for a caller
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
     final public function removePermission(Caller $caller, Permission $permission)
@@ -37,8 +36,8 @@ abstract class ReadOnlyDriver implements Driver
     /**
      * Stores a new permission for a role
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
     final public function storeRolePermission(Role $role, Permission $permission)
@@ -48,8 +47,8 @@ abstract class ReadOnlyDriver implements Driver
     /**
      * Removes a permission for a role
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
     final public function removeRolePermission(Role $role, Permission $permission)

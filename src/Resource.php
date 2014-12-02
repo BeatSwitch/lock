@@ -1,7 +1,7 @@
 <?php
 namespace BeatSwitch\Lock;
 
-class Resource implements Contracts\Resource
+class Resource implements Resources\Resource
 {
     /**
      * @var string|null

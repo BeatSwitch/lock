@@ -1,5 +1,5 @@
 <?php
-namespace BeatSwitch\Lock\Contracts;
+namespace BeatSwitch\Lock\Resources;
 
 /**
  * A contract to identify a resource which can be used to set permissions on

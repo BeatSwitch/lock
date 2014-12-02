@@ -1,8 +1,7 @@
 <?php
 namespace BeatSwitch\Lock\Permissions;
 
-use BeatSwitch\Lock\Contracts\Permission;
-use BeatSwitch\Lock\Contracts\Resource;
+use BeatSwitch\Lock\Resources\Resource;
 
 abstract class AbstractPermission
 {
@@ -12,21 +11,21 @@ abstract class AbstractPermission
     protected $action;
 
     /**
-     * @var \BeatSwitch\Lock\Contracts\Resource|null
+     * @var \BeatSwitch\Lock\Resources\Resource|null
      */
     protected $resource;
 
     /**
-     * @var \BeatSwitch\Lock\Contracts\Condition[]
+     * @var \BeatSwitch\Lock\Permissions\Condition[]
      */
     protected $conditions;
 
     /**
      * @param string $action
-     * @param \BeatSwitch\Lock\Contracts\Resource|null $resource
-     * @param \BeatSwitch\Lock\Contracts\Condition[]
+     * @param \BeatSwitch\Lock\Resources\Resource|null $resource
+     * @param \BeatSwitch\Lock\Permissions\Condition[]
      */
-    public function __construct($action, Resource $resource = null, array $conditions = array())
+    public function __construct($action, Resource $resource = null, array $conditions = [])
     {
         $this->action = $action;
         $this->resource = $resource;
@@ -36,7 +35,7 @@ abstract class AbstractPermission
     /**
      * Determine if a permission exactly matches the current instance
      *
-     * @param \BeatSwitch\Lock\Contracts\Permission $permission
+     * @param \BeatSwitch\Lock\Permissions\Permission $permission
      * @return bool
      */
     public function matchesPermission(Permission $permission)
@@ -52,7 +51,7 @@ abstract class AbstractPermission
      * Validate a permission against the given params.
      *
      * @param string $action
-     * @param \BeatSwitch\Lock\Contracts\Resource|null $resource
+     * @param \BeatSwitch\Lock\Resources\Resource|null $resource
      * @return bool
      */
     protected function resolve($action, Resource $resource = null)
@@ -90,7 +89,7 @@ abstract class AbstractPermission
     /**
      * Validate the resource
      *
-     * @param \BeatSwitch\Lock\Contracts\Resource $resource
+     * @param \BeatSwitch\Lock\Resources\Resource $resource
      * @return bool
      */
     protected function matchesResource(Resource $resource)
@@ -132,7 +131,7 @@ abstract class AbstractPermission
     }
 
     /**
-     * @return \BeatSwitch\Lock\Contracts\Resource|null
+     * @return \BeatSwitch\Lock\Resources\Resource|null
      */
     public function getResource()
     {

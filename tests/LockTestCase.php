@@ -26,14 +26,14 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
     /**
      * The caller used to instantiate the main Lock instance
      *
-     * @var \BeatSwitch\Lock\Contracts\Caller
+     * @var \BeatSwitch\Lock\Callers\Caller
      */
     protected $caller;
 
     /**
      * The driver used to instantiate the main Lock instance
      *
-     * @var \BeatSwitch\Lock\Contracts\Driver
+     * @var \BeatSwitch\Lock\Drivers\Driver
      */
     protected $driver;
 

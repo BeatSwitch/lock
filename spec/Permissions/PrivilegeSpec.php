@@ -15,7 +15,7 @@ class PrivilegeSpec extends ObjectBehavior
     function it_is_initializable()
     {
         $this->shouldHaveType('BeatSwitch\Lock\Permissions\Privilege');
-        $this->shouldImplement('BeatSwitch\Lock\Contracts\Permission');
+        $this->shouldImplement('BeatSwitch\Lock\Permissions\Permission');
     }
 
     function it_can_validate_itself_against_parameters()

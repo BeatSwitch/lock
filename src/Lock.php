@@ -1,23 +1,23 @@
 <?php
 namespace BeatSwitch\Lock;
 
-use BeatSwitch\Lock\Contracts\Caller;
-use BeatSwitch\Lock\Contracts\Driver;
-use BeatSwitch\Lock\Contracts\Permission;
-use BeatSwitch\Lock\Contracts\Resource as ResourceContract;
-use BeatSwitch\Lock\Contracts\Role as RoleContract;
+use BeatSwitch\Lock\Callers\Caller;
+use BeatSwitch\Lock\Drivers\Driver;
+use BeatSwitch\Lock\Permissions\Permission;
+use BeatSwitch\Lock\Resources\Resource as ResourceContract;
+use BeatSwitch\Lock\Roles\Role as RoleContract;
 use BeatSwitch\Lock\Permissions\Privilege;
 use BeatSwitch\Lock\Permissions\Restriction;
 
 class Lock
 {
     /**
-     * @var \BeatSwitch\Lock\Contracts\Caller
+     * @var \BeatSwitch\Lock\Callers\Caller
      */
     protected $caller;
 
     /**
-     * @var \BeatSwitch\Lock\Contracts\Driver
+     * @var \BeatSwitch\Lock\Drivers\Driver
      */
     protected $driver;
 
@@ -29,13 +29,13 @@ class Lock
     protected $aliases = [];
 
     /**
-     * @var \BeatSwitch\Lock\Contracts\Role[]
+     * @var \BeatSwitch\Lock\Roles\Role[]
      */
     protected $roles = [];
 
     /**
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @param \BeatSwitch\Lock\Contracts\Driver $driver
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @param \BeatSwitch\Lock\Drivers\Driver $driver
      */
     public function __construct(Caller $caller, Driver $driver)
     {
@@ -47,7 +47,7 @@ class Lock
      * Determine if one or more actions are allowed
      *
      * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
      * @return bool
      */
@@ -75,7 +75,7 @@ class Lock
      * Determine if an action isn't allowed
      *
      * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
      * @return bool
      */
@@ -88,9 +88,9 @@ class Lock
      * Give a caller permission to do something
      *
      * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
-     * @param \BeatSwitch\Lock\Contracts\Condition[] $conditions
+     * @param \BeatSwitch\Lock\Permissions\Condition[] $conditions
      */
     public function allow($action, $resource = null, $resourceId = null, array $conditions = array())
     {
@@ -121,9 +121,9 @@ class Lock
      * Deny a caller from doing something
      *
      * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
-     * @param \BeatSwitch\Lock\Contracts\Condition[] $conditions
+     * @param \BeatSwitch\Lock\Permissions\Condition[] $conditions
      */
     public function deny($action, $resource = null, $resourceId = null, array $conditions = array())
     {
@@ -153,7 +153,7 @@ class Lock
      * Change the value for a permission
      *
      * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
      */
     public function toggle($action, $resource = null, $resourceId = null)
@@ -192,11 +192,11 @@ class Lock
     /**
      * Give a role permission to do something
      *
-     * @param string|array|\BeatSwitch\Lock\Contracts\Role $role
+     * @param string|array|\BeatSwitch\Lock\Roles\Role $role
      * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
-     * @param \BeatSwitch\Lock\Contracts\Condition[]
+     * @param \BeatSwitch\Lock\Permissions\Condition[]
      */
     public function allowRole($role, $action, $resource = null, $resourceId = null, array $conditions = array())
     {
@@ -231,11 +231,11 @@ class Lock
     /**
      * Deny a role from doing something
      *
-     * @param string|array|\BeatSwitch\Lock\Contracts\Role $roles
+     * @param string|array|\BeatSwitch\Lock\Roles\Role $roles
      * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Contracts\Resource $resource
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
-     * @param \BeatSwitch\Lock\Contracts\Condition[]
+     * @param \BeatSwitch\Lock\Permissions\Condition[]
      */
     public function denyRole($roles, $action, $resource = null, $resourceId = null, array $conditions = array())
     {
@@ -271,7 +271,7 @@ class Lock
      * Determine if an action is allowed
      *
      * @param string $action
-     * @param \BeatSwitch\Lock\Contracts\Resource $resource
+     * @param \BeatSwitch\Lock\Resources\Resource $resource
      * @return bool
      */
     protected function resolvePermissions($action, ResourceContract $resource)
@@ -304,9 +304,9 @@ class Lock
     /**
      * Check if the given restrictions prevent the given action and resource to pass
      *
-     * @param \BeatSwitch\Lock\Contracts\Permission[] $permissions
+     * @param \BeatSwitch\Lock\Permissions\Permission[] $permissions
      * @param string $action
-     * @param \BeatSwitch\Lock\Contracts\Resource $resource
+     * @param \BeatSwitch\Lock\Resources\Resource $resource
      * @return bool
      */
     protected function resolveRestrictions($permissions, $action, ResourceContract $resource)
@@ -324,9 +324,9 @@ class Lock
     /**
      * Check if the given privileges allow the given action and resource to pass
      *
-     * @param \BeatSwitch\Lock\Contracts\Permission[] $permissions
+     * @param \BeatSwitch\Lock\Permissions\Permission[] $permissions
      * @param string $action
-     * @param \BeatSwitch\Lock\Contracts\Resource $resource
+     * @param \BeatSwitch\Lock\Resources\Resource $resource
      * @return bool
      */
     protected function resolvePrivileges($permissions, $action, ResourceContract $resource)
@@ -345,7 +345,7 @@ class Lock
     /**
      * Returns the permissions for the current caller
      *
-     * @return \BeatSwitch\Lock\Contracts\Permission[]
+     * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
     protected function getPermissions()
     {
@@ -355,7 +355,7 @@ class Lock
     /**
      * Stores a permission into the driver
      *
-     * @param \BeatSwitch\Lock\Contracts\Permission $permission
+     * @param \BeatSwitch\Lock\Permissions\Permission $permission
      */
     protected function storePermission(Permission $permission)
     {
@@ -369,7 +369,7 @@ class Lock
     /**
      * Removes a permission from the driver
      *
-     * @param \BeatSwitch\Lock\Contracts\Permission $permission
+     * @param \BeatSwitch\Lock\Permissions\Permission $permission
      */
     protected function removePermission(Permission $permission)
     {
@@ -382,7 +382,7 @@ class Lock
     /**
      * Checks if a caller has a specific permission
      *
-     * @param \BeatSwitch\Lock\Contracts\Permission $permission
+     * @param \BeatSwitch\Lock\Permissions\Permission $permission
      * @return bool
      */
     protected function hasPermission(Permission $permission)
@@ -398,8 +398,8 @@ class Lock
     /**
      * Returns the permissions for the current caller
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @return \BeatSwitch\Lock\Contracts\Permission[]
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
     protected function getRolePermissions(RoleContract $role)
     {
@@ -409,8 +409,8 @@ class Lock
     /**
      * Stores a permission into the driver
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @param \BeatSwitch\Lock\Contracts\Permission $permission
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @param \BeatSwitch\Lock\Permissions\Permission $permission
      */
     protected function storeRolePermission(RoleContract $role, Permission $permission)
     {
@@ -423,8 +423,8 @@ class Lock
     /**
      * Removes a permission from the driver
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @param \BeatSwitch\Lock\Contracts\Permission $permission
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @param \BeatSwitch\Lock\Permissions\Permission $permission
      */
     protected function removeRolePermission(RoleContract $role, Permission $permission)
     {
@@ -434,8 +434,8 @@ class Lock
     /**
      * Checks if a caller has a specific permission
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @param \BeatSwitch\Lock\Contracts\Permission $permission
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @param \BeatSwitch\Lock\Permissions\Permission $permission
      * @return bool
      */
     protected function hasRolePermission(RoleContract $role, Permission $permission)
@@ -446,7 +446,7 @@ class Lock
     /**
      * Get the permissions for all the roles from the current caller
      *
-     * @return \BeatSwitch\Lock\Contracts\Permission[]
+     * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
     protected function getRolePermissionsForCaller()
     {
@@ -465,8 +465,8 @@ class Lock
     /**
      * Returns all the permissions for a role and their inherited roles
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @return \BeatSwitch\Lock\Contracts\Permission[]
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
     protected function getInheritedRolePermissions(RoleContract $role)
     {
@@ -513,9 +513,9 @@ class Lock
     /**
      * Create a resource value object if a non resource object is passed
      *
-     * @param string|\BeatSwitch\Lock\Contracts\Resource|null $resource
+     * @param string|\BeatSwitch\Lock\Resources\Resource|null $resource
      * @param int|null $resourceId
-     * @return \BeatSwitch\Lock\Contracts\Resource
+     * @return \BeatSwitch\Lock\Resources\Resource
      */
     protected function getResourceObject($resource, $resourceId = null)
     {
@@ -529,8 +529,8 @@ class Lock
     /**
      * Create a role value object if a non role object is passed
      *
-     * @param string|\BeatSwitch\Lock\Contracts\Role $role
-     * @return \BeatSwitch\Lock\Contracts\Role|null
+     * @param string|\BeatSwitch\Lock\Roles\Role $role
+     * @return \BeatSwitch\Lock\Roles\Role|null
      */
     protected function getRoleObject($role)
     {
@@ -541,7 +541,7 @@ class Lock
      * Find a role in roles array
      *
      * @param string $role
-     * @return \BeatSwitch\Lock\Contracts\Role|null
+     * @return \BeatSwitch\Lock\Roles\Role|null
      */
     protected function findRole($role)
     {
@@ -555,7 +555,7 @@ class Lock
     /**
      * The current caller for this Acl object
      *
-     * @return \BeatSwitch\Lock\Contracts\Caller
+     * @return \BeatSwitch\Lock\Callers\Caller
      */
     public function getCaller()
     {
@@ -565,7 +565,7 @@ class Lock
     /**
      * The current driver for this Acl object
      *
-     * @return \BeatSwitch\Lock\Contracts\Driver
+     * @return \BeatSwitch\Lock\Drivers\Driver
      */
     public function getDriver()
     {

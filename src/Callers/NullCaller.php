@@ -1,8 +1,6 @@
 <?php
 namespace BeatSwitch\Lock\Callers;
 
-use BeatSwitch\Lock\Contracts\Caller;
-
 /**
  * A NullCaller represents a non-existing caller
  *

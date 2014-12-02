@@ -1,5 +1,7 @@
 <?php
-namespace BeatSwitch\Lock\Contracts;
+namespace BeatSwitch\Lock\Permissions;
+
+use BeatSwitch\Lock\Resources\Resource;
 
 /**
  * A contract to define a permission condition. Conditions need to give
@@ -11,7 +13,7 @@ interface Condition
      * Assert if the condition is correct
      *
      * @param string $action
-     * @param \BeatSwitch\Lock\Contracts\Resource|null $resource
+     * @param \BeatSwitch\Lock\Resources\Resource|null $resource
      * @return bool
      */
     public function assert($action, Resource $resource = null);
