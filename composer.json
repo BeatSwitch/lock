@@ -1,6 +1,6 @@
 {
     "name": "beatswitch/lock",
-    "description": "A flexible, driver based Acl package for PHP 5.4+",
+    "description": "A flexible, driver based Acl package for PHP 5.4+.",
     "keywords": ["acl", "permissions", "security", "roles", "BeatSwitch", "asserts", "conditions", "drivers"],
     "homepage": "https://github.com/BeatSwitch/lock",
     "license": "MIT",
