@@ -7,11 +7,16 @@
          convertWarningsToExceptions="true"
          processIsolation="false"
          stopOnFailure="false"
-         syntaxCheck="false">
-
+         syntaxCheck="false"
+>
     <testsuites>
         <testsuite name="beatswitch/lock/tests">
             <directory>./tests</directory>
         </testsuite>
     </testsuites>
+    <filter>
+        <whitelist>
+            <directory suffix=".php">./src/</directory>
+        </whitelist>
+    </filter>
 </phpunit>
