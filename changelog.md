@@ -6,15 +6,17 @@ All notable changes to Lock will be documented in this file. This file follows t
 
 ### Added
 
-- Scrutinizer config
+- Scrutinizer config for code quality and code coverage
 - Changelog
 - Contributers file
 - `.gitattributes` file
 
 ### Changed
 
+- Moved interfaces to their own namespaces
 - Refactored most of the testing suite
 - Renamed the `AbstractPermission` class
+- ArrayDriverTest moved to the `Drivers` namespace
 
 ### Removed
 
