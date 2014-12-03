@@ -10,6 +10,7 @@ All notable changes to Lock will be documented in this file. This file follows t
 - Changelog
 - Contributers file
 - `.gitattributes` file
+- Added section to readme about testing your driver
 
 ### Changed
 
@@ -17,6 +18,7 @@ All notable changes to Lock will be documented in this file. This file follows t
 - Refactored most of the testing suite
 - Renamed the `AbstractPermission` class
 - ArrayDriverTest moved to the `Drivers` namespace
+- Split the `LockTestCase` into `PersistentDriverTestCase` and `StaticDriverTestCase`
 
 ### Removed
 

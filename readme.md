@@ -36,7 +36,8 @@ Made possible thanks to [BeatSwitch](https://beatswitch.com). Inspired by [Autho
     - [Working with conditions](#working-with-conditions)
     - [Using the LockAware trait](#using-the-lockaware-trait)
 - [Api](#api)
-- [Building a Driver](#building-a-driver)
+- [Building a driver](#building-a-driver)
+    - [Testing your driver](#testing-your-driver)
 - [Maintainer](#maintainer)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
@@ -561,7 +562,7 @@ denyRole(
 )
 ```
 
-## Building a Driver
+## Building a driver
 
 You can easily build a driver by implementing the `BeatSwitch\Lock\Drivers\Driver` contract. Below we'll demonstrate how to create our own persistent driver using Laravel's Eloquent ORM as our storage mechanism.
 
@@ -607,7 +608,7 @@ class EloquentDriver implements Driver
         $permissions = CallerPermission::where('caller_type', $caller->getCallerType())
             ->where('caller_id', $caller->getCallerId())
             ->get();
-        
+
         return PermissionFactory::createFromArray($permissions->toArray());
     }
 
@@ -736,6 +737,31 @@ class EloquentDriver implements Driver
 Notice that we're not checking if the permission already exists when we're attempting to store it. You don't need to worry about that because that's all been done for you in the `Lock` instance.
 
 Now we have a driver which supports storing of permissions for callers and roles.
+
+### Testing your driver
+
+It's very easy for you to make sure your driver works as expected. If you're building a persistent driver you can easily test it by creating a PHPUnit test which extends the `PersistentDriverTestCase` class.
+
+```php
+<?php
+
+use tests\BeatSwitch\Lock\Drivers\PersistentDriverTestCase;
+
+class EloquentDriverTest extends PersistentDriverTestCase
+{
+    public function setUp()
+    {
+        // Bootstrap your driver.
+        $this->driver = new EloquentDriver();
+
+        // Don't forget to reset your DB here.
+
+        parent::setUp();
+    }
+}
+```
+
+And this is all you need! The `PersistentDriverTestCase` contains all the tests you'll need to make sure your driver works as expected. So if all those tests pass then your driver was set up correctly. No need to mock anything, this is a pure integration test case. Of course in this specific case for Eloquent to work you'll need to bootstrap Laravel. Working with an DB like sqlite would be the best way here to test your driver. 
 
 ## Maintainer
 

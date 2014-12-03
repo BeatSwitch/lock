@@ -2,9 +2,9 @@
 namespace tests\BeatSwitch\Lock\Drivers;
 
 use BeatSwitch\Lock\Drivers\ArrayDriver;
-use tests\BeatSwitch\Lock\LockTestCase;
+use tests\BeatSwitch\Lock\PersistentDriverTestCase;
 
-class ArrayDriverTest extends LockTestCase
+class ArrayDriverTest extends StaticDriverTestCase
 {
     public function setUp()
     {

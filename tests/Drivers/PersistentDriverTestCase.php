@@ -1,13 +1,14 @@
 <?php
-namespace tests\BeatSwitch\Lock;
+namespace tests\BeatSwitch\Lock\Drivers;
 
 use BeatSwitch\Lock\Manager;
 use BeatSwitch\Lock\Resource;
 use stubs\BeatSwitch\Lock\CallerStub;
-use stubs\BeatSwitch\Lock\FalseConditionStub;
-use stubs\BeatSwitch\Lock\TrueConditionStub;
 
-abstract class LockTestCase extends \PHPUnit_Framework_TestCase
+/**
+ * The PersistentDriverTestCase can be used to test persistent drivers
+ */
+abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
 {
     /**
      * The main Lock instance
@@ -248,15 +249,5 @@ abstract class LockTestCase extends \PHPUnit_Framework_TestCase
         // If we deny the user from publishing anything afterwards, our role permissions are invalid.
         $this->lock->deny('publish');
         $this->assertFalse($this->lock->can(['create', 'publish'], 'pages'));
-    }
-
-    /** @test */
-    final function it_can_work_with_conditions()
-    {
-        $this->lock->allow('upload', 'files', null, [new TrueConditionStub()]);
-        $this->lock->allow('upload', 'photos', null, [new FalseConditionStub()]);
-
-        $this->assertTrue($this->lock->can('upload', 'files'));
-        $this->assertFalse($this->lock->can('upload', 'photos'));
     }
 }
