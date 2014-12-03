@@ -96,12 +96,12 @@ composer require beatswitch/lock
 
 ### Implementing the Caller contract
 
-Every identity which should have permissions to do something must implement the `Caller` contract. The `Caller` contract identifies a caller by requiring it to return its type and its unique identifier. Let's look at an example below.
+Every identity which should have permissions to do something must implement the `BeatSwitch\Lock\Callers\Caller` contract. The `Caller` contract identifies a caller by requiring it to return its type and its unique identifier. Let's look at an example below.
 
 ```php
 <?php
 
-use BeatSwitch\Lock\Contracts\Caller;
+use BeatSwitch\Lock\Callers\Caller;
 
 class User implements Caller
 {
@@ -127,7 +127,7 @@ By adding the `getCallerType` function we can identify a group of callers throug
 ```php
 <?php
 
-use BeatSwitch\Lock\Contracts\Caller;
+use BeatSwitch\Lock\Callers\Caller;
 
 class Organization implements Caller
 {
@@ -289,13 +289,6 @@ $lock->can('update', 'posts'); // false
 You could easily set a caller which has all permissions for everything by passing the `all` wildcard as an action on the lock instance.
 
 ```php
-use \BeatSwitch\Lock\Drivers\ArrayDriver;
-use \BeatSwitch\Lock\Lock;
-
-// Instantiate the Lock instance.
-$lock = new Lock($caller, new ArrayDriver());
-
-// Set a single permission with the `all` wildcard.
 $lock->allow('all');
 ```
 
@@ -352,7 +345,7 @@ $lock->can('create', 'posts'); // true: the user has explicit permission to crea
 
 ### Working with conditions
 
-Conditions are actually asserts which are extra checks you can set for permissions. You can pass an array with them as the last parameter of `allow` and `deny`. All conditions must implement the `\BeatSwitch\Lock\Contracts\Condition` interface.
+Conditions are actually asserts which are extra checks you can set for permissions. You can pass an array with them as the last parameter of `allow` and `deny`. All conditions must implement the `\BeatSwitch\Lock\Permissions\Condition` interface.
 
 > **Warning:** please note that conditions currently only work with static drivers.
 
@@ -361,8 +354,8 @@ Let's setup a condition.
 ```php
 <?php
 
-use BeatSwitch\Lock\Contracts\Condition;
-use BeatSwitch\Lock\Contracts\Resource;
+use BeatSwitch\Lock\Permissions\Condition;
+use BeatSwitch\Lock\Resources\Resource;
 use Illuminate\Auth\AuthManager;
 
 class LoggedInCondition implements Condition
@@ -386,7 +379,7 @@ class LoggedInCondition implements Condition
      * Assert if the condition is correct
      *
      * @param string $action
-     * @param \BeatSwitch\Lock\Contracts\Resource $resource
+     * @param \BeatSwitch\Lock\Resources\Resource $resource
      * @return bool
      */
     public function assert($action, Resource $resource)
@@ -415,7 +408,7 @@ You can easily add acl functionality to your caller by implementing the `BeatSwi
 ```php
 <?php
 
-use BeatSwitch\Lock\Contracts\Caller;
+use BeatSwitch\Lock\Callers\Caller;
 use BeatSwitch\Lock\LockAware;
 
 class Organization implements Caller
@@ -463,7 +456,7 @@ Checks to see if the current caller has permission to do something.
 ```
 can(
     string|array $action,
-    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    string|\BeatSwitch\Lock\Resources\Resource $resource = null,
     int $resourceId = null
 )
 ```
@@ -475,7 +468,7 @@ Checks to see if it's forbidden for the current caller to do something.
 ```
 cannot(
     string|array $action,
-    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    string|\BeatSwitch\Lock\Resources\Resource $resource = null,
     int $resourceId = null
 )
 ```
@@ -487,9 +480,9 @@ Sets a `Privilege` permission on a caller to allow it to do something. Removes a
 ```
 allow(
     string|array $action,
-    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    string|\BeatSwitch\Lock\Resources\Resource $resource = null,
     int $resourceId = null,
-    \BeatSwitch\Lock\Contracts\Condition[] $conditions = []
+    \BeatSwitch\Lock\Permissions\Condition[] $conditions = []
 )
 ```
 
@@ -500,9 +493,9 @@ Sets a `Restriction` permission on a caller to prevent it from doing something. 
 ```
 deny(
     string|array $action,
-    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    string|\BeatSwitch\Lock\Resources\Resource $resource = null,
     int $resourceId = null,
-    \BeatSwitch\Lock\Contracts\Condition[] $conditions = []
+    \BeatSwitch\Lock\Permissions\Condition[] $conditions = []
 )
 ```
 
@@ -513,7 +506,7 @@ Toggles the value for the given permission.
 ```
 toggle(
     string|array $action,
-    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    string|\BeatSwitch\Lock\Resources\Resource $resource = null,
     int $resourceId = null
 )
 ```
@@ -546,11 +539,11 @@ Sets a `Privilege` permission on one or more roles to allow them to do something
 
 ```
 allowRole(
-    string|array|\BeatSwitch\Lock\Contracts\Role $role,
+    string|array|\BeatSwitch\Lock\Roles\Role $role,
     string|array $action,
-    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    string|\BeatSwitch\Lock\Resources\Resource $resource = null,
     int $resourceId = null,
-    \BeatSwitch\Lock\Contracts\Condition[] $conditions = []
+    \BeatSwitch\Lock\Permissions\Condition[] $conditions = []
 )
 ```
 
@@ -560,17 +553,17 @@ Sets a `Restriction` permission on one or more roles to prevent them from doing 
 
 ```
 denyRole(
-    string|array|\BeatSwitch\Lock\Contracts\Role $role,
+    string|array|\BeatSwitch\Lock\Roles\Role $role,
     string|array $action,
-    string|\BeatSwitch\Lock\Contracts\Resource $resource = null,
+    string|\BeatSwitch\Lock\Resources\Resource $resource = null,
     int $resourceId = null,
-    \BeatSwitch\Lock\Contracts\Condition[] $conditions = []
+    \BeatSwitch\Lock\Permissions\Condition[] $conditions = []
 )
 ```
 
 ## Building a Driver
 
-You can easily build a driver by implementing the `BeatSwitch\Lock\Contracts\Driver` contract. Below we'll demonstrate how to create our own persistent driver using Laravel's Eloquent ORM as our storage mechanism.
+You can easily build a driver by implementing the `BeatSwitch\Lock\Drivers\Driver` contract. Below we'll demonstrate how to create our own persistent driver using Laravel's Eloquent ORM as our storage mechanism.
 
 We'll assume we have a `CallerPermission` model class with at least the following database columns:
 
@@ -594,9 +587,9 @@ Let's check out a full implementation of the driver below. Notice that for the `
 ```php
 <?php
 
-use BeatSwitch\Lock\Contracts\Caller;
-use BeatSwitch\Lock\Contracts\Driver;
-use BeatSwitch\Lock\Contracts\Permission as PermissionContract;
+use BeatSwitch\Lock\Callers\Caller;
+use BeatSwitch\Lock\Drivers\Driver;
+use BeatSwitch\Lock\Permissions\Permission;
 use BeatSwitch\Lock\Permissions\PermissionFactory;
 use CallerPermission;
 use RolePermission;
@@ -606,8 +599,8 @@ class EloquentDriver implements Driver
     /**
      * Returns all the permissions for a caller
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @return \BeatSwitch\Lock\Contracts\PermissionContract[]
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
     public function getPermissions(Caller $caller)
     {
@@ -621,11 +614,11 @@ class EloquentDriver implements Driver
     /**
      * Stores a new permission into the driver for a caller
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
-    public function storePermission(Caller $caller, PermissionContract $permission)
+    public function storePermission(Caller $caller, Permission $permission)
     {
         $eloquentPermission = new CallerPermission;
         $eloquentPermission->caller_type = $caller->getCallerType();
@@ -640,11 +633,11 @@ class EloquentDriver implements Driver
     /**
      * Removes a permission from the driver for a caller
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
-    public function removePermission(Caller $caller, PermissionContract $permission)
+    public function removePermission(Caller $caller, Permission $permission)
     {
         CallerPermission::where('caller_type', $caller->getCallerType())
             ->where('caller_id', $caller->getCallerId())
@@ -658,11 +651,11 @@ class EloquentDriver implements Driver
     /**
      * Checks if a permission is stored for a user
      *
-     * @param \BeatSwitch\Lock\Contracts\Caller $caller
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return bool
      */
-    public function hasPermission(Caller $caller, PermissionContract $permission)
+    public function hasPermission(Caller $caller, Permission $permission)
     {
         return (bool) CallerPermission::where('caller_type', $caller->getCallerType())
             ->where('caller_id', $caller->getCallerId())
@@ -676,8 +669,8 @@ class EloquentDriver implements Driver
     /**
      * Returns all the permissions for a role
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @return \BeatSwitch\Lock\Contracts\Permission[]
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
     public function getRolePermissions(Role $role)
     {
@@ -689,8 +682,8 @@ class EloquentDriver implements Driver
     /**
      * Stores a new permission for a role
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
     public function storeRolePermission(Role $role, Permission $permission)
@@ -707,8 +700,8 @@ class EloquentDriver implements Driver
     /**
      * Removes a permission for a role
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
     public function removeRolePermission(Role $role, Permission $permission)
@@ -724,8 +717,8 @@ class EloquentDriver implements Driver
     /**
      * Checks if a permission is stored for a role
      *
-     * @param \BeatSwitch\Lock\Contracts\Role $role
-     * @param \BeatSwitch\Lock\Contracts\Permission
+     * @param \BeatSwitch\Lock\Roles\Role $role
+     * @param \BeatSwitch\Lock\Permissions\Permission
      * @return bool
      */
     public function hasRolePermission(Role $role, Permission $permission)
