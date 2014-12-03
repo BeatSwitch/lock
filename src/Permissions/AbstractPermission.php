@@ -57,7 +57,7 @@ abstract class AbstractPermission
     protected function resolve($action, Resource $resource = null)
     {
         // If no resource was set for this permission we'll only need to check the action.
-        if ($this->resource === null || $this->resource->getResourceType() === null || $resource === null) {
+        if ($this->resource === null || $this->resource->getResourceType() === null) {
             return $this->matchesAction($action) && $this->resolveConditions();
         }
 
@@ -89,11 +89,18 @@ abstract class AbstractPermission
     /**
      * Validate the resource
      *
-     * @param \BeatSwitch\Lock\Resources\Resource $resource
+     * @param \BeatSwitch\Lock\Resources\Resource|null $resource
      * @return bool
      */
-    protected function matchesResource(Resource $resource)
+    protected function matchesResource(Resource $resource = null)
     {
+        // If the resource is null we should only return true if the current resource is also null.
+        if ($resource === null) {
+            return $this->getResource() === null || (
+                $this->getResourceType() === null && $this->getResourceId() === null
+            );
+        }
+
         // If the permission's resource id is null then all resources with a specific ID are accepted.
         if ($this->getResourceId() === null) {
             return $this->getResourceType() === $resource->getResourceType();
