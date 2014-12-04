@@ -266,7 +266,7 @@ abstract class Lock
     /**
      * The current driver provided by the manager
      *
-     * @return \BeatSwitch\Lock\Manager
+     * @return \BeatSwitch\Lock\Drivers\Driver
      */
     public function getDriver()
     {

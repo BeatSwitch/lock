@@ -5,7 +5,6 @@ use BeatSwitch\Lock\Lock;
 use BeatSwitch\Lock\Manager;
 use BeatSwitch\Lock\Permissions\Permission;
 use BeatSwitch\Lock\Resources\Resource;
-use BeatSwitch\Lock\Roles\Role;
 
 class CallerLock extends Lock
 {

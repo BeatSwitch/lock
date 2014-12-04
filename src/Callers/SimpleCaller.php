@@ -35,7 +35,7 @@ final class SimpleCaller implements Caller
     }
 
     /**
-     * @return null
+     * @return string
      */
     public function getCallerType()
     {
