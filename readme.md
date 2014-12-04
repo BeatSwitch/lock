@@ -459,6 +459,20 @@ $caller->can('create', 'posts');
 $caller->allow('edit', 'pages');
 ```
 
+If you have a caller which implements the `LockAware` trait but haven't bootstrapped the caller's lock instance yet you can easily make the caller lock aware by using the manager's `makeCallerLockAware` method.
+
+```php
+$caller = $manager->makeCallerLockAware($caller);
+```
+
+And now your caller will be able to use the `LockAware` methods. There's a similar method for roles.
+
+```
+$role = $manager->makeRoleLockAware('guest');
+```
+
+This will bootstrap a `SimpleRole` object which already comes with the `LockAware` trait in place.
+
 ## Api
 
 ### Lock
@@ -547,6 +561,26 @@ Returns a `BeatSwitch\Lock\Lock` instance for a role.
 
 ```
 getRoleLock(
+    \BeatSwitch\Lock\Roles\Role $role
+)
+```
+
+#### makeCallerLockAware
+
+Sets the lock instance for a caller which implements the `LockAware` trait. Returns the caller with the lock instance set.
+
+```
+makeCallerLockAware(
+    \BeatSwitch\Lock\Callers\Caller $caller
+)
+```
+
+#### makeRoleLockAware
+
+Sets the lock instance for a role which implements the `LockAware` trait. Returns the role with the lock instance set.
+
+```
+makeRoleLockAware(
     \BeatSwitch\Lock\Roles\Role $role
 )
 ```

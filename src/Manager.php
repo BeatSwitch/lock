@@ -54,6 +54,37 @@ class Manager
     }
 
     /**
+     * Sets the lock instance on caller that implements the LockAware trait
+     *
+     * @param \BeatSwitch\Lock\Callers\Caller $caller
+     * @return \BeatSwitch\Lock\Callers\Caller
+     */
+    public function makeCallerLockAware(Caller $caller)
+    {
+        $lock = $this->getCallerLock($caller);
+
+        $caller->setLock($lock);
+
+        return $caller;
+    }
+
+    /**
+     * Sets the lock instance on role that implements the LockAware trait
+     *
+     * @param \BeatSwitch\Lock\Roles\Role|string $role
+     * @return \BeatSwitch\Lock\Roles\Role
+     */
+    public function makeRoleLockAware($role)
+    {
+        $role = $this->convertRoleToObject($role);
+        $lock = $this->getRoleLock($role);
+
+        $role->setLock($lock);
+
+        return $role;
+    }
+
+    /**
      * Register an alias to group certain actions
      *
      * @param string $name

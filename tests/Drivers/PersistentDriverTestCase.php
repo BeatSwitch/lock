@@ -294,4 +294,24 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($lock->can('create', 'posts'));
     }
+
+    /** @test */
+    final function it_can_make_a_caller_lock_aware()
+    {
+        $this->getCallerLock()->allow('create', 'users');
+
+        $caller = $this->manager->makeCallerLockAware($this->caller);
+
+        $this->assertTrue($caller->can('create', 'users'));
+    }
+
+    /** @test */
+    final function it_can_make_a_role_lock_aware()
+    {
+        $this->getRoleLock('admin')->allow('create', 'users');
+
+        $role = $this->manager->makeRoleLockAware('admin');
+
+        $this->assertTrue($role->can('create', 'users'));
+    }
 }

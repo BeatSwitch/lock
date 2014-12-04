@@ -1,8 +1,12 @@
 <?php
 namespace BeatSwitch\Lock\Roles;
 
+use BeatSwitch\Lock\LockAware;
+
 final class SimpleRole implements Role
 {
+    use LockAware;
+
     /**
      * @var string
      */

@@ -11,6 +11,7 @@ All notable changes to Lock will be documented in this file. This file follows t
 - Contributers file
 - `.gitattributes` file
 - Added section to readme about testing your driver
+- The `Manager` class now has methods to set the lock instance for objects which implement the `LockAware` trait
 
 ### Changed
 
