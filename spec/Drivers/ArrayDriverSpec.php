@@ -1,14 +1,11 @@
 <?php
 namespace spec\BeatSwitch\Lock\Drivers;
 
-// Import stubs
-require_once __DIR__ . '/../../stubs/CallerStub.php';
-
+use BeatSwitch\Lock\Callers\SimpleCaller;
 use BeatSwitch\Lock\Permissions\Privilege;
-use BeatSwitch\Lock\Resource;
+use BeatSwitch\Lock\Resources\SimpleResource;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use stubs\BeatSwitch\Lock\CallerStub;
 
 class ArrayDriverSpec extends ObjectBehavior
 {
@@ -19,11 +16,11 @@ class ArrayDriverSpec extends ObjectBehavior
 
     function let()
     {
-        $this->caller = new CallerStub('users', 1);
+        $this->caller = new SimpleCaller('users', 1);
 
-        $this->storePermission($this->caller, new Privilege('read'));
-        $this->storePermission($this->caller, new Privilege('edit', new Resource('users', 1)));
-        $this->storePermission($this->caller, new Privilege('manage', new Resource('tasks')));
+        $this->storeCallerPermission($this->caller, new Privilege('read'));
+        $this->storeCallerPermission($this->caller, new Privilege('edit', new SimpleResource('users', 1)));
+        $this->storeCallerPermission($this->caller, new Privilege('manage', new SimpleResource('tasks')));
     }
 
     function it_is_initializable()
@@ -32,26 +29,26 @@ class ArrayDriverSpec extends ObjectBehavior
         $this->shouldImplement('BeatSwitch\Lock\Drivers\Driver');
     }
 
-    function it_returns_permissions()
+    function it_returns_caller_permissions()
     {
-        $this->getPermissions($this->caller)->shouldHaveCount(3);
+        $this->getCallerPermissions($this->caller)->shouldHaveCount(3);
     }
 
-    function it_stores_a_permission()
+    function it_stores_a_caller_permission()
     {
-        $this->storePermission($this->caller, new Privilege('create', new Resource('events')));
-        $this->getPermissions($this->caller)->shouldHaveCount(4);
+        $this->storeCallerPermission($this->caller, new Privilege('create', new SimpleResource('events')));
+        $this->getCallerPermissions($this->caller)->shouldHaveCount(4);
     }
 
-    function it_removes_a_permission()
+    function it_removes_a_caller_permission()
     {
-        $this->removePermission($this->caller, new Privilege('manage', new Resource('tasks')));
-        $this->getPermissions($this->caller)->shouldHaveCount(2);
+        $this->removeCallerPermission($this->caller, new Privilege('manage', new SimpleResource('tasks')));
+        $this->getCallerPermissions($this->caller)->shouldHaveCount(2);
     }
 
-    function it_can_confirm_it_has_a_permission()
+    function it_can_confirm_it_has_a_caller_permission()
     {
-        $this->hasPermission($this->caller, new Privilege('manage', new Resource('tasks')))->shouldReturn(true);
-        $this->hasPermission($this->caller, new Privilege('edit', new Resource('events')))->shouldReturn(false);
+        $this->hasCallerPermission($this->caller, new Privilege('manage', new SimpleResource('tasks')))->shouldReturn(true);
+        $this->hasCallerPermission($this->caller, new Privilege('edit', new SimpleResource('events')))->shouldReturn(false);
     }
 }

@@ -1,47 +1,18 @@
 <?php
 namespace BeatSwitch\Lock;
 
-use BeatSwitch\Lock\Callers\Caller;
-use BeatSwitch\Lock\Drivers\Driver;
 use BeatSwitch\Lock\Permissions\Permission;
-use BeatSwitch\Lock\Resources\Resource as ResourceContract;
-use BeatSwitch\Lock\Roles\Role as RoleContract;
+use BeatSwitch\Lock\Resources\Resource;
+use BeatSwitch\Lock\Resources\SimpleResource;
 use BeatSwitch\Lock\Permissions\Privilege;
 use BeatSwitch\Lock\Permissions\Restriction;
 
-class Lock
+abstract class Lock
 {
     /**
-     * @var \BeatSwitch\Lock\Callers\Caller
+     * @var \BeatSwitch\Lock\Manager
      */
-    protected $caller;
-
-    /**
-     * @var \BeatSwitch\Lock\Drivers\Driver
-     */
-    protected $driver;
-
-    /**
-     * Action aliases
-     *
-     * @var \BeatSwitch\Lock\ActionAlias[]
-     */
-    protected $aliases = [];
-
-    /**
-     * @var \BeatSwitch\Lock\Roles\Role[]
-     */
-    protected $roles = [];
-
-    /**
-     * @param \BeatSwitch\Lock\Callers\Caller $caller
-     * @param \BeatSwitch\Lock\Drivers\Driver $driver
-     */
-    public function __construct(Caller $caller, Driver $driver)
-    {
-        $this->caller = $caller;
-        $this->driver = $driver;
-    }
+    protected $manager;
 
     /**
      * Determine if one or more actions are allowed
@@ -54,7 +25,7 @@ class Lock
     public function can($action, $resource = null, $resourceId = null)
     {
         $actions = (array) $action;
-        $resource = $this->getResourceObject($resource, $resourceId);
+        $resource = $this->convertResourceToObject($resource, $resourceId);
 
         foreach ($actions as $action) {
             if ($aliases = $this->getAliasesForAction($action)) {
@@ -85,17 +56,17 @@ class Lock
     }
 
     /**
-     * Give a caller permission to do something
+     * Give the subject permission to do something
      *
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
      * @param \BeatSwitch\Lock\Permissions\Condition[] $conditions
      */
-    public function allow($action, $resource = null, $resourceId = null, array $conditions = array())
+    public function allow($action, $resource = null, $resourceId = null, array $conditions = [])
     {
         $actions = (array) $action;
-        $resource = $this->getResourceObject($resource, $resourceId);
+        $resource = $this->convertResourceToObject($resource, $resourceId);
         $permissions = $this->getPermissions();
 
         foreach ($actions as $action) {
@@ -118,17 +89,17 @@ class Lock
     }
 
     /**
-     * Deny a caller from doing something
+     * Deny the subject from doing something
      *
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
      * @param \BeatSwitch\Lock\Permissions\Condition[] $conditions
      */
-    public function deny($action, $resource = null, $resourceId = null, array $conditions = array())
+    public function deny($action, $resource = null, $resourceId = null, array $conditions = [])
     {
         $actions = (array) $action;
-        $resource = $this->getResourceObject($resource, $resourceId);
+        $resource = $this->convertResourceToObject($resource, $resourceId);
         $permissions = $this->getPermissions();
 
         foreach ($actions as $action) {
@@ -166,140 +137,13 @@ class Lock
     }
 
     /**
-     * Register an alias to group certain actions
-     *
-     * @param string $name
-     * @param string|array $actions
-     */
-    public function alias($name, $actions)
-    {
-        $this->aliases[$name] = new ActionAlias($name, $actions);
-    }
-
-    /**
-     * Add one role to the lock instance
-     *
-     * @param string|array $names
-     * @param string $inherit
-     */
-    public function setRole($names, $inherit = null)
-    {
-        foreach ((array) $names as $name) {
-            $this->roles[$name] = new Role($name, $inherit);
-        }
-    }
-
-    /**
-     * Give a role permission to do something
-     *
-     * @param string|array|\BeatSwitch\Lock\Roles\Role $role
-     * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
-     * @param int $resourceId
-     * @param \BeatSwitch\Lock\Permissions\Condition[]
-     */
-    public function allowRole($role, $action, $resource = null, $resourceId = null, array $conditions = array())
-    {
-        $roles = (array) $role;
-        $actions = (array) $action;
-        $resource = $this->getResourceObject($resource, $resourceId);
-
-        foreach ($roles as $role) {
-            if ($role = $this->getRoleObject($role)) {
-                $permissions = $this->getRolePermissions($role);
-
-                foreach ($actions as $action) {
-                    foreach ($permissions as $key => $permission) {
-                        if ($permission instanceof Restriction && !$permission->isAllowed($action, $resource)) {
-                            $this->removeRolePermission($role, $permission);
-                            unset($permissions[$key]);
-                        }
-                    }
-
-                    $restriction = new Restriction($action, $resource);
-
-                    if ($this->hasRolePermission($role, $restriction)) {
-                        $this->removeRolePermission($role, $restriction);
-                    }
-
-                    $this->storeRolePermission($role, new Privilege($action, $resource, $conditions));
-                }
-            }
-        }
-    }
-
-    /**
-     * Deny a role from doing something
-     *
-     * @param string|array|\BeatSwitch\Lock\Roles\Role $roles
-     * @param string|array $action
-     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
-     * @param int $resourceId
-     * @param \BeatSwitch\Lock\Permissions\Condition[]
-     */
-    public function denyRole($roles, $action, $resource = null, $resourceId = null, array $conditions = array())
-    {
-        $roles = (array) $roles;
-        $actions = (array) $action;
-        $resource = $this->getResourceObject($resource, $resourceId);
-
-        foreach ($roles as $role) {
-            if ($role = $this->getRoleObject($role)) {
-                $permissions = $this->getRolePermissions($role);
-
-                foreach ($actions as $action) {
-                    foreach ($permissions as $key => $permission) {
-                        if ($permission instanceof Privilege && $permission->isAllowed($action, $resource)) {
-                            $this->removeRolePermission($role, $permission);
-                            unset($permissions[$key]);
-                        }
-                    }
-
-                    $privilege = new Privilege($action, $resource);
-
-                    if ($this->hasRolePermission($role, $privilege)) {
-                        $this->removeRolePermission($role, $privilege);
-                    }
-
-                    $this->storeRolePermission($role, new Restriction($action, $resource, $conditions));
-                }
-            }
-        }
-    }
-
-    /**
      * Determine if an action is allowed
      *
      * @param string $action
      * @param \BeatSwitch\Lock\Resources\Resource $resource
      * @return bool
      */
-    protected function resolvePermissions($action, ResourceContract $resource)
-    {
-        $permissions = $this->getPermissions();
-        $rolePermissions = $this->getRolePermissionsForCaller();
-
-        $callerRestrictionsResult = $this->resolveRestrictions($permissions, $action, $resource);
-
-        // Search for restrictions in the permissions. We'll do this first
-        // because restrictions should override any privileges.
-        if (! $callerRestrictionsResult) {
-            return false;
-        }
-
-        $rolesRestrictionsResult = $this->resolveRestrictions($rolePermissions, $action, $resource);
-        $callerPrivilegesResult = $this->resolvePrivileges($permissions, $action, $resource);
-
-        // If there are restrictions on the roles but caller specific privileges are set, allow this to pass.
-        if (! $rolesRestrictionsResult && $callerPrivilegesResult) {
-            return true;
-        }
-
-        $rolesPrivilegesResult = $this->resolvePrivileges($rolePermissions, $action, $resource);
-
-        // If no restrictions are found, pass when a privilege is found on either the roles or caller.
-        return $callerPrivilegesResult || $rolesPrivilegesResult;
-    }
+    abstract protected function resolvePermissions($action, Resource $resource);
 
     /**
      * Check if the given restrictions prevent the given action and resource to pass
@@ -309,7 +153,7 @@ class Lock
      * @param \BeatSwitch\Lock\Resources\Resource $resource
      * @return bool
      */
-    protected function resolveRestrictions($permissions, $action, ResourceContract $resource)
+    protected function resolveRestrictions($permissions, $action, Resource $resource)
     {
         foreach ($permissions as $permission) {
             // If we've found a matching restriction, return false.
@@ -329,7 +173,7 @@ class Lock
      * @param \BeatSwitch\Lock\Resources\Resource $resource
      * @return bool
      */
-    protected function resolvePrivileges($permissions, $action, ResourceContract $resource)
+    protected function resolvePrivileges($permissions, $action, Resource $resource)
     {
         // Search for privileges in the permissions.
         foreach ($permissions as $permission) {
@@ -343,153 +187,33 @@ class Lock
     }
 
     /**
-     * Returns the permissions for the current caller
+     * Returns the permissions for the current subject
      *
      * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
-    protected function getPermissions()
-    {
-        return $this->hasAnExistingCaller() ? $this->driver->getPermissions($this->caller) : [];
-    }
+    abstract protected function getPermissions();
 
     /**
      * Stores a permission into the driver
      *
      * @param \BeatSwitch\Lock\Permissions\Permission $permission
      */
-    protected function storePermission(Permission $permission)
-    {
-        // It only makes sense to store a permission for a caller which exists.
-        // Also don't re-store the permission if it already exists.
-        if ($this->hasAnExistingCaller() && ! $this->hasPermission($permission)) {
-            $this->driver->storePermission($this->caller, $permission);
-        }
-    }
+    abstract protected function storePermission(Permission $permission);
 
     /**
      * Removes a permission from the driver
      *
      * @param \BeatSwitch\Lock\Permissions\Permission $permission
      */
-    protected function removePermission(Permission $permission)
-    {
-        // It only makes sense to remove a permission for a caller which exists.
-        if ($this->hasAnExistingCaller()) {
-            $this->driver->removePermission($this->caller, $permission);
-        }
-    }
+    abstract protected function removePermission(Permission $permission);
 
     /**
-     * Checks if a caller has a specific permission
+     * Checks if the subject has a specific permission
      *
      * @param \BeatSwitch\Lock\Permissions\Permission $permission
      * @return bool
      */
-    protected function hasPermission(Permission $permission)
-    {
-        // It only makes sense to check a permission for a caller which exists.
-        if ($this->hasAnExistingCaller()) {
-            return $this->driver->hasPermission($this->caller, $permission);
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns the permissions for the current caller
-     *
-     * @param \BeatSwitch\Lock\Roles\Role $role
-     * @return \BeatSwitch\Lock\Permissions\Permission[]
-     */
-    protected function getRolePermissions(RoleContract $role)
-    {
-        return $this->driver->getRolePermissions($role);
-    }
-
-    /**
-     * Stores a permission into the driver
-     *
-     * @param \BeatSwitch\Lock\Roles\Role $role
-     * @param \BeatSwitch\Lock\Permissions\Permission $permission
-     */
-    protected function storeRolePermission(RoleContract $role, Permission $permission)
-    {
-        // Don't re-store the permission if it already exists.
-        if (! $this->hasRolePermission($role, $permission)) {
-            $this->driver->storeRolePermission($role, $permission);
-        }
-    }
-
-    /**
-     * Removes a permission from the driver
-     *
-     * @param \BeatSwitch\Lock\Roles\Role $role
-     * @param \BeatSwitch\Lock\Permissions\Permission $permission
-     */
-    protected function removeRolePermission(RoleContract $role, Permission $permission)
-    {
-        $this->driver->removeRolePermission($role, $permission);
-    }
-
-    /**
-     * Checks if a caller has a specific permission
-     *
-     * @param \BeatSwitch\Lock\Roles\Role $role
-     * @param \BeatSwitch\Lock\Permissions\Permission $permission
-     * @return bool
-     */
-    protected function hasRolePermission(RoleContract $role, Permission $permission)
-    {
-        return $this->driver->hasRolePermission($role, $permission);
-    }
-
-    /**
-     * Get the permissions for all the roles from the current caller
-     *
-     * @return \BeatSwitch\Lock\Permissions\Permission[]
-     */
-    protected function getRolePermissionsForCaller()
-    {
-        $roles = $this->caller->getCallerRoles();
-        $permissions = [];
-
-        foreach ($roles as $role) {
-            if ($role = $this->getRoleObject($role)) {
-                $permissions = array_merge($permissions, $this->getInheritedRolePermissions($role));
-            }
-        }
-
-        return $permissions;
-    }
-
-    /**
-     * Returns all the permissions for a role and their inherited roles
-     *
-     * @param \BeatSwitch\Lock\Roles\Role $role
-     * @return \BeatSwitch\Lock\Permissions\Permission[]
-     */
-    protected function getInheritedRolePermissions(RoleContract $role)
-    {
-        $permissions = $this->getRolePermissions($role);
-
-        if ($inheritedRole = $role->getInheritedRole()) {
-            $inheritedRole = $this->getRoleObject($inheritedRole);
-
-            $permissions = array_merge($permissions, $this->getInheritedRolePermissions($inheritedRole));
-        }
-
-        return $permissions;
-    }
-
-    /**
-     * Returns the identifier for the caller
-     *
-     * @return bool
-     */
-    protected function hasAnExistingCaller()
-    {
-        return $this->caller->getCallerType() !== null && $this->caller->getCallerId() !== null;
-    }
+    abstract protected function hasPermission(Permission $permission);
 
     /**
      * Returns all aliases which contain the given action
@@ -501,7 +225,7 @@ class Lock
     {
         $actions = [];
 
-        foreach ($this->aliases as $aliasName => $alias) {
+        foreach ($this->manager->getAliases() as $aliasName => $alias) {
             if ($alias->hasAction($action)) {
                 $actions[] = $aliasName;
             }
@@ -517,58 +241,35 @@ class Lock
      * @param int|null $resourceId
      * @return \BeatSwitch\Lock\Resources\Resource
      */
-    protected function getResourceObject($resource, $resourceId = null)
+    protected function convertResourceToObject($resource, $resourceId = null)
     {
-        if (! $resource instanceof ResourceContract) {
-            return new Resource($resource, $resourceId);
-        }
-
-        return $resource;
+        return ! $resource instanceof Resource ? new SimpleResource($resource, $resourceId) : $resource;
     }
 
     /**
-     * Create a role value object if a non role object is passed
+     * Returns the current lock instant's subject
      *
-     * @param string|\BeatSwitch\Lock\Roles\Role $role
-     * @return \BeatSwitch\Lock\Roles\Role|null
+     * @return object
      */
-    protected function getRoleObject($role)
-    {
-        return ! $role instanceof RoleContract ? $this->findRole($role) : $role;
-    }
+    abstract public function getSubject();
 
     /**
-     * Find a role in roles array
+     * The current manager instance
      *
-     * @param string $role
-     * @return \BeatSwitch\Lock\Roles\Role|null
+     * @return \BeatSwitch\Lock\Manager
      */
-    protected function findRole($role)
+    public function getManager()
     {
-        if (array_key_exists($role, $this->roles)) {
-            return $this->roles[$role];
-        }
-
-        return null;
+        return $this->manager;
     }
 
     /**
-     * The current caller for this Acl object
+     * The current driver provided by the manager
      *
-     * @return \BeatSwitch\Lock\Callers\Caller
-     */
-    public function getCaller()
-    {
-        return $this->caller;
-    }
-
-    /**
-     * The current driver for this Acl object
-     *
-     * @return \BeatSwitch\Lock\Drivers\Driver
+     * @return \BeatSwitch\Lock\Manager
      */
     public function getDriver()
     {
-        return $this->driver;
+        return $this->manager->getDriver();
     }
 }

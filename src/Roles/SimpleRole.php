@@ -1,17 +1,17 @@
 <?php
-namespace BeatSwitch\Lock;
+namespace BeatSwitch\Lock\Roles;
 
-class Role implements Roles\Role
+final class SimpleRole implements Role
 {
     /**
      * @var string
      */
-    protected $name;
+    private $name;
 
     /**
      * @var string|null
      */
-    protected $inherit;
+    private $inherit;
 
     /**
      * @param string $name

@@ -1,9 +1,9 @@
 <?php
 namespace tests\BeatSwitch\Lock\Drivers;
 
+use BeatSwitch\Lock\Callers\SimpleCaller;
 use BeatSwitch\Lock\Manager;
-use BeatSwitch\Lock\Resource;
-use stubs\BeatSwitch\Lock\CallerStub;
+use BeatSwitch\Lock\Resources\SimpleResource;
 
 /**
  * The PersistentDriverTestCase can be used to test persistent drivers
@@ -16,13 +16,6 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
      * @var \BeatSwitch\Lock\Manager
      */
     protected $manager;
-
-    /**
-     * The main Lock instance
-     *
-     * @var \BeatSwitch\Lock\Lock
-     */
-    protected $lock;
 
     /**
      * The caller used to instantiate the main Lock instance
@@ -46,151 +39,187 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
         $this->manager = new Manager($this->driver);
 
         // Init the caller.
-        $caller = new CallerStub('users', 1, ['editor']);
+        $this->caller = new SimpleCaller('users', 1, ['editor']);
+        $this->caller->setLock($this->getCallerLock());
+    }
 
-        // Create the lock instance.
-        $this->lock = $this->manager->caller($caller);
+    /**
+     * @return \BeatSwitch\Lock\Callers\CallerLock
+     */
+    protected function getCallerLock()
+    {
+        return $this->manager->getCallerLock($this->caller);
+    }
 
-        // Set the Lock instance on the caller to init the trait functionality.
-        $caller->setLock($this->lock);
-        $this->caller = $caller;
+    /**
+     * @param \BeatSwitch\Lock\Roles\Role|string $role
+     * @return \BeatSwitch\Lock\Roles\RoleLock
+     */
+    protected function getRoleLock($role)
+    {
+        return $this->manager->getRoleLock($role);
     }
 
     /** @test */
     final function it_succeeds_with_a_valid_action()
     {
-        $this->lock->allow('create');
+        $lock = $this->getCallerLock();
 
-        $this->assertTrue($this->lock->can('create'));
+        $lock->allow('create');
+
+        $this->assertTrue($lock->can('create'));
     }
 
     /** @test */
     final function it_fails_with_an_invalid_action()
     {
-        $this->assertFalse($this->lock->can('edit'));
+        $this->assertFalse($this->getCallerLock()->can('edit'));
     }
 
     /** @test */
     final function it_fails_with_a_denied_action()
     {
-        $this->lock->allow('update');
-        $this->lock->deny('update');
+        $lock = $this->getCallerLock();
 
-        $this->assertFalse($this->lock->can('update'));
+        $lock->allow('update');
+        $lock->deny('update');
+
+        $this->assertFalse($lock->can('update'));
     }
 
     /** @test */
     final function it_succeeds_with_an_inverse_check()
     {
-        $this->assertTrue($this->lock->cannot('update'));
+        $this->assertTrue($this->getCallerLock()->cannot('update'));
     }
 
     /** @test */
     final function it_succeeds_with_a_valid_resource_type()
     {
-        $this->lock->allow('delete', 'events');
+        $lock = $this->getCallerLock();
 
-        $this->assertTrue($this->lock->can('delete', 'events'));
+        $lock->allow('delete', 'events');
+
+        $this->assertTrue($lock->can('delete', 'events'));
     }
 
     /** @test */
     final function it_fails_with_an_invalid_resource_type()
     {
-        $this->assertFalse($this->lock->can('delete', 'pages'));
+        $this->assertFalse($this->getCallerLock()->can('delete', 'pages'));
     }
 
     /** @test */
     final function it_succeeds_with_a_valid_action_on_a_resource_object()
     {
-        $event = new Resource('events', 1);
-        $this->lock->allow('read', $event);
-        $this->assertTrue($this->lock->can('read', $event));
+        $lock = $this->getCallerLock();
+        $event = new SimpleResource('events', 1);
+
+        $lock->allow('read', $event);
+
+        $this->assertTrue($lock->can('read', $event));
     }
 
     /** @test */
     final function it_fails_with_an_invalid_action_on_a_resource_object()
     {
-        $this->assertFalse($this->lock->can('edit', new Resource('events', 1)));
+        $this->assertFalse($this->getCallerLock()->can('edit', new SimpleResource('events', 1)));
     }
 
     /** @test */
     final function it_fails_with_a_denied_action_on_a_resource_type()
     {
-        $this->lock->allow('export', 'events');
-        $this->lock->deny('export', 'events');
+        $lock = $this->getCallerLock();
 
-        $this->assertFalse($this->lock->can('export', 'events'));
+        $lock->allow('export', 'events');
+        $lock->deny('export', 'events');
+
+        $this->assertFalse($lock->can('export', 'events'));
     }
 
     /** @test */
     final function it_always_succeeds_with_the_all_action()
     {
-        $this->lock->allow('all', 'posts');
+        $lock = $this->getCallerLock();
 
-        $this->assertTrue($this->lock->can('create', 'posts'));
-        $this->assertTrue($this->lock->can('update', 'posts'));
-        $this->assertTrue($this->lock->can('delete', 'posts'));
+        $lock->allow('all', 'posts');
+
+        $this->assertTrue($lock->can('create', 'posts'));
+        $this->assertTrue($lock->can('update', 'posts'));
+        $this->assertTrue($lock->can('delete', 'posts'));
 
         // But we can't just call every action for every resource type.
-        $this->assertFalse($this->lock->can('create', 'events'));
+        $this->assertFalse($lock->can('create', 'events'));
     }
 
     /** @test */
     function it_fails_with_a_denied_action_for_a_resource_type()
     {
-        $this->lock->allow('update', new Resource('events', 1));
+        $lock = $this->getCallerLock();
+
+        $lock->allow('update', new SimpleResource('events', 1));
 
         // We can't update every event, just the one with an ID of 1.
-        $this->assertFalse($this->lock->can('update', 'events'));
+        $this->assertFalse($lock->can('update', 'events'));
     }
 
     /** @test */
     final function it_succeeds_when_overriding_a_denied_action_on_a_resource()
     {
-        $stub = new Resource('events', 1);
+        $lock = $this->getCallerLock();
+        $stub = new SimpleResource('events', 1);
 
-        $this->lock->deny('update');
-        $this->lock->allow('update', $stub);
+        $lock->deny('update');
+        $lock->allow('update', $stub);
 
-        $this->assertTrue($this->lock->can('update', $stub));
+        $this->assertTrue($lock->can('update', $stub));
     }
 
     /** @test */
     final function it_fails_with_an_incorrect_resource_object()
     {
-        $this->lock->allow('update', new Resource('events', 1));
-        $this->assertFalse($this->lock->can('update', new Resource('events', 2)));
+        $lock = $this->getCallerLock();
+
+        $lock->allow('update', new SimpleResource('events', 1));
+
+        $this->assertFalse($lock->can('update', new SimpleResource('events', 2)));
     }
 
     /** @test */
     final function it_can_check_multiple_permissions_at_once()
     {
-        $this->lock->allow(['create', 'delete'], 'comments');
+        $lock = $this->getCallerLock();
 
-        $this->assertTrue($this->lock->can(['create', 'delete'], 'comments'));
-        $this->assertTrue($this->lock->cannot(['create', 'edit'], 'comments'));
+        $lock->allow(['create', 'delete'], 'comments');
+
+        $this->assertTrue($lock->can(['create', 'delete'], 'comments'));
+        $this->assertTrue($lock->cannot(['create', 'edit'], 'comments'));
     }
 
     /** @test */
     final function it_can_toggle_permissions()
     {
-        $this->lock->toggle('edit', 'events');
-        $this->assertTrue($this->lock->can('edit', 'events'));
+        $lock = $this->getCallerLock();
 
-        $this->lock->toggle('edit', 'events');
-        $this->assertFalse($this->lock->can('edit', 'events'));
+        $lock->toggle('edit', 'events');
+        $this->assertTrue($lock->can('edit', 'events'));
+
+        $lock->toggle('edit', 'events');
+        $this->assertFalse($lock->can('edit', 'events'));
     }
 
     /** @test */
     final function it_can_toggle_multiple_permissions_at_once()
     {
-        $this->lock->allow(['create', 'delete'], 'comments');
+        $lock = $this->getCallerLock();
 
-        $this->lock->toggle(['create', 'delete'], 'comments');
-        $this->assertFalse($this->lock->can(['create', 'delete'], 'comments'));
+        $lock->allow(['create', 'delete'], 'comments');
 
-        $this->lock->toggle(['create', 'delete'], 'comments');
-        $this->assertTrue($this->lock->can(['create', 'delete'], 'comments'));
+        $lock->toggle(['create', 'delete'], 'comments');
+        $this->assertFalse($lock->can(['create', 'delete'], 'comments'));
+
+        $lock->toggle(['create', 'delete'], 'comments');
+        $this->assertTrue($lock->can(['create', 'delete'], 'comments'));
     }
 
     /** @test */
@@ -215,39 +244,54 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
      */
     final function it_can_check_actions_from_aliases()
     {
-        $this->lock->alias('manage', ['create', 'read', 'update', 'delete']);
-        $this->lock->allow('manage', 'accounts');
+        $this->manager->alias('manage', ['create', 'read', 'update', 'delete']);
 
-        $this->assertFalse($this->lock->can('manage'));
-        $this->assertTrue($this->lock->can('manage', 'accounts'));
-        $this->assertTrue($this->lock->can('manage', 'accounts', 1));
-        $this->assertFalse($this->lock->can('manage', 'events'));
-        $this->assertTrue($this->lock->can('read', 'accounts'));
-        $this->assertTrue($this->lock->can(['read', 'update'], 'accounts'));
+        $lock = $this->getCallerLock();
+        $lock->allow('manage', 'accounts');
+
+        $this->assertFalse($lock->can('manage'));
+        $this->assertTrue($lock->can('manage', 'accounts'));
+        $this->assertTrue($lock->can('manage', 'accounts', 1));
+        $this->assertFalse($lock->can('manage', 'events'));
+        $this->assertTrue($lock->can('read', 'accounts'));
+        $this->assertTrue($lock->can(['read', 'update'], 'accounts'));
 
 //        // If one of the aliased actions is explicitly denied, it cannot pass anymore.
-//        $this->lock->deny('create');
+//        $lock->deny('create');
 //
-//        $this->assertFalse($this->lock->can('manage', 'accounts'));
-//        $this->assertFalse($this->lock->can('create', 'accounts'));
-//        $this->assertTrue($this->lock->can(['read', 'update', 'delete'], 'accounts'));
+//        $this->assertFalse($lock->can('manage', 'accounts'));
+//        $this->assertFalse($lock->can('create', 'accounts'));
+//        $this->assertTrue($lock->can(['read', 'update', 'delete'], 'accounts'));
     }
 
     /** @test */
     final function it_can_work_with_roles()
     {
-        $this->lock->setRole('user');
-        $this->lock->setRole(['editor', 'admin'], 'user');
+        $this->manager->setRole('user');
+        $this->manager->setRole(['editor', 'admin'], 'user');
 
-        $this->lock->allowRole('user', 'create', 'pages');
-        $this->lock->allowRole(['editor', 'admin'], 'publish', 'pages');
-        $this->lock->allowRole('admin', 'delete', 'pages');
+        $this->getRoleLock('user')->allow('create', 'pages');
+        $this->getRoleLock('editor')->allow('publish', 'pages');
+        $this->getRoleLock('admin')->allow(['delete', 'publish'], 'pages');
 
-        $this->assertTrue($this->lock->can(['create', 'publish'], 'pages'));
-        $this->assertFalse($this->lock->can('delete', 'pages'));
+        $lock = $this->getCallerLock();
+
+        $this->assertTrue($lock->can(['create', 'publish'], 'pages'));
+        $this->assertFalse($lock->can('delete', 'pages'));
 
         // If we deny the user from publishing anything afterwards, our role permissions are invalid.
-        $this->lock->deny('publish');
-        $this->assertFalse($this->lock->can(['create', 'publish'], 'pages'));
+        $lock->deny('publish');
+        $this->assertFalse($lock->can(['create', 'publish'], 'pages'));
+    }
+
+    /** @test */
+    final function caller_permissions_override_role_permissions()
+    {
+        $lock = $this->getCallerLock();
+        $lock->allow('create', 'posts');
+
+        $this->getRoleLock('user')->deny('user', 'create', 'posts');
+
+        $this->assertTrue($lock->can('create', 'posts'));
     }
 }

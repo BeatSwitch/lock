@@ -14,10 +14,12 @@ abstract class StaticDriverTestCase extends PersistentDriverTestCase
     /** @test */
     final function it_can_work_with_conditions()
     {
-        $this->lock->allow('upload', 'files', null, [new TrueConditionStub()]);
-        $this->lock->allow('upload', 'photos', null, [new FalseConditionStub()]);
+        $lock = $this->getCallerLock();
 
-        $this->assertTrue($this->lock->can('upload', 'files'));
-        $this->assertFalse($this->lock->can('upload', 'photos'));
+        $lock->allow('upload', 'files', null, [new TrueConditionStub()]);
+        $lock->allow('upload', 'photos', null, [new FalseConditionStub()]);
+
+        $this->assertTrue($lock->can('upload', 'files'));
+        $this->assertFalse($lock->can('upload', 'photos'));
     }
 }

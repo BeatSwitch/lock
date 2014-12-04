@@ -19,7 +19,7 @@ interface Driver
      * @param \BeatSwitch\Lock\Callers\Caller $caller
      * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
-    public function getPermissions(Caller $caller);
+    public function getCallerPermissions(Caller $caller);
 
     /**
      * Stores a new permission for a caller
@@ -28,7 +28,7 @@ interface Driver
      * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
-    public function storePermission(Caller $caller, Permission $permission);
+    public function storeCallerPermission(Caller $caller, Permission $permission);
 
     /**
      * Removes a permission for a caller
@@ -37,7 +37,7 @@ interface Driver
      * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
-    public function removePermission(Caller $caller, Permission $permission);
+    public function removeCallerPermission(Caller $caller, Permission $permission);
 
     /**
      * Checks if a permission is stored for a caller
@@ -46,7 +46,7 @@ interface Driver
      * @param \BeatSwitch\Lock\Permissions\Permission
      * @return bool
      */
-    public function hasPermission(Caller $caller, Permission $permission);
+    public function hasCallerPermission(Caller $caller, Permission $permission);
 
     /**
      * Returns all the permissions for a role

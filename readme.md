@@ -45,6 +45,7 @@ Made possible thanks to [BeatSwitch](https://beatswitch.com). Inspired by [Autho
 
 ## Terminology
 
+- `Lock`: An acl instance for a subject. This package currently ships with a `CallerLock` and a `RoleLock` 
 - `Caller`: An identity object that can have permissions to do something
 - `Driver`: A storage system for permissions which can either be static or persistent
 - `Permission`: A permission holds an action and an optional (unique) resource. Can be either a `Restriction` or a `Privilege`
@@ -52,25 +53,28 @@ Made possible thanks to [BeatSwitch](https://beatswitch.com). Inspired by [Autho
 - `Privilege`: A privilege allows you to perform an action (on an optional resource)
 - `Action`: An action is something you are either allowed or denied to do
 - `Resource`: A resource can be an object where you can perform one or more actions on. It can either target a certain type of resource or a specific resource by its unique identifier
+- `Role`: A role can also hold multiple permissions. A caller can have multiple roles. Roles can inherit permissions from other roles
 
 ## Features
 
-- Flexible Acl permissions for multiple identities (callers)
+- Flexible acl permissions for multiple identities (callers)
 - Static or persistent drivers to store permissions
 - Action aliases
 - Roles
 - Conditions (Asserts)
-- Easily Implement acl functionality on your caller with a trait
+- Easily implement acl functionality on your caller or role with a trait
 
 ## Introduction
 
-Lock differs from other Acl packages by trying to provide the most flexible way for working with multiple permission callers and storing permissions.
+Lock differs from other acl packages by trying to provide the most flexible way for working with multiple permission callers and storing permissions.
 
 By working with Lock's `Caller` contract you can set permissions on multiple identities.
 
 The `Driver` contract allows for an easy way to store permissions to a persistent or static storage system. A default static `ArrayDriver` ships with this package. Check out the list below for more drivers which have already been prepared for you. Or build your own by implementing the `Driver` contract.
 
 You can set and check permissions for resources by manually passing along a resource's type and (optional) identifier or you can implement the `Resource` contract onto your objects so you can pass them along to lock more easily.
+
+The `Manager` allows for an easy way to instantiate new `Lock` instances, set action aliases or register roles.
 
 ## Drivers
 
@@ -149,18 +153,22 @@ class Organization implements Caller
 }
 ```
 
-And thus we can easily retrieve permissions for a specific caller type through a persistent storage driver.
+And thus we can easily retrieve permissions for a specific caller type through a driver.
 
 ### Working with a static driver
 
-If you'd like to configure all of your permissions beforehand you can use the static `ArrayDriver` which ships with the package. This allows you to set a list of permissions for a caller at runtime.
+If you'd like to configure all of your permissions beforehand you can use the static `ArrayDriver` which ships with the package. This allows you to set a list of permissions for a caller before your application is run.
 
 ```php
 use \BeatSwitch\Lock\Drivers\ArrayDriver;
 use \BeatSwitch\Lock\Lock;
+use \BeatSwitch\Lock\Manager;
 
-// Instantiate the Lock instance with the static ArrayDriver.
-$lock = new Lock($caller, new ArrayDriver());
+// Create a new Manager instance.
+$manager = new Manager(new ArrayDriver());
+
+// Instantiate a new Lock instance for an object which implements the Caller contract.
+$lock = $manager->getCallerLock($caller);
 
 // Set some permissions.
 $lock->allow('manage_settings');
@@ -201,7 +209,7 @@ class UserManagementController extends BaseController
 
         $user = User::find($userId);
 
-        $this->lockManager->caller($user)->toggle($action, $resource);
+        $this->lockManager->getCallerLock($user)->toggle($action, $resource);
 
         return Redirect::route('user_management');
     }
@@ -297,35 +305,37 @@ Now every "can" method call will validate to true for this caller.
 
 ### Working with roles
 
-Lock provides an easy way to working with roles. Before you get started with adding permissions to roles, you first need to register them on a lock instance.
+Lock provides an easy way to working with roles. You can work with roles out of the box but if you want to work with inheritance, you'll need to register the roles to the manager instance.
 
 ```php
-$lock->setRole('guest');
-$lock->setRole('user', 'guest'); // "user" will inherit all permissions from "guest"
+$manager->setRole('guest');
+$manager->setRole('user', 'guest'); // "user" will inherit all permissions from "guest"
 ```
 
 Or register multiple roles at once.
 
 ```php
-$lock->setRole(['editor', 'admin'], 'user'); // "editor" and "admin" will inherit all permissions from "user".
+$manager->setRole(['editor', 'admin'], 'user'); // "editor" and "admin" will inherit all permissions from "user".
 ```
 
 Let's set some permissions and see how they are resolved.
 
 ```php
 // Allow a guest to read everything.
-$lock->allowRole('guest', 'read');
+$manager->getRoleLock('guest')->allow('guest', 'read');
 
 // Allow a user to create posts.
-$lock->allowRole('user', 'create', 'posts');
+$manager->getRoleLock('user')->allow('create', 'posts');
 
 // Allow an editor and admin to publish posts.
-$lock->allowRole(['editor', 'admin'], 'publish', 'posts');
+$manager->getRoleLock('editor')->allow('publish', 'posts');
+$manager->getRoleLock('admin')->allow('publish', 'posts');
 
 // Allow an admin to delete posts.
-$lock->allowRole('admin', 'delete', 'posts');
+$manager->getRoleLock('admin')->allow('delete', 'posts');
 
 // Let's assume our caller has the role of "editor" and check some permissions.
+$lock = $manager->getCallerLock($caller);
 $lock->can('read'); // true
 $lock->can('delete', 'posts'); // false
 $lock->can('publish'); // false: we can't publish everything, just posts.
@@ -337,9 +347,12 @@ Something you need to be aware of is that caller-level permissions supersede rol
 Our caller will have the user role.
 
 ```php
-$lock->setRole('user');
+$lock = $manager->getCallerLock($caller);
 $lock->allow('create', 'posts');
-$lock->denyRole('user', 'create', 'posts');
+
+// Notice that we don't need to set the role in the
+// manager first if we don't care about inheritance.
+$manager->getRoleLock('user')->deny('user', 'create', 'posts');
 
 $lock->can('create', 'posts'); // true: the user has explicit permission to create posts.
 ```
@@ -404,7 +417,7 @@ You can pass along as many conditions as you like but they all need to succeed i
 
 ### Using the LockAware trait
 
-You can easily add acl functionality to your caller by implementing the `BeatSwitch\Lock\LockAware` trait.
+You can easily add acl functionality to your caller or role by implementing the `BeatSwitch\Lock\LockAware` trait.
 
 ```php
 <?php
@@ -448,9 +461,11 @@ $caller->allow('edit', 'pages');
 
 ## Api
 
+### Lock
+
 The following methods can all be called on a `\BeatSwitch\Lock\Lock` instance.
 
-### can
+#### can
 
 Checks to see if the current caller has permission to do something.
 
@@ -462,7 +477,7 @@ can(
 )
 ```
 
-### cannot
+#### cannot
 
 Checks to see if it's forbidden for the current caller to do something.
 
@@ -474,7 +489,7 @@ cannot(
 )
 ```
 
-### allow
+#### allow
 
 Sets a `Privilege` permission on a caller to allow it to do something. Removes any matching restrictions.
 
@@ -487,7 +502,7 @@ allow(
 )
 ```
 
-### deny
+#### deny
 
 Sets a `Restriction` permission on a caller to prevent it from doing something. Removes any matching privileges.
 
@@ -500,7 +515,7 @@ deny(
 )
 ```
 
-### toggle
+#### toggle
 
 Toggles the value for the given permission.
 
@@ -512,7 +527,31 @@ toggle(
 )
 ```
 
-### alias
+### Manager
+
+The following methods can all be called on a `BeatSwitch\Lock\Manager` instance.
+
+#### getCallerLock
+
+Returns a `BeatSwitch\Lock\Lock` instance for a caller.
+
+```
+getCallerLock(
+    \BeatSwitch\Lock\Callers\Caller $caller
+)
+```
+
+#### getRoleLock
+
+Returns a `BeatSwitch\Lock\Lock` instance for a role.
+
+```
+getRoleLock(
+    \BeatSwitch\Lock\Roles\Role $role
+)
+```
+
+#### alias
 
 Add an alias for one or more actions.
 
@@ -523,7 +562,7 @@ alias(
 )
 ```
 
-### setRole
+#### setRole
 
 Set one or more roles and an optional role to inherit permissions from.
 
@@ -531,34 +570,6 @@ Set one or more roles and an optional role to inherit permissions from.
 setRole(
     string|array $name,
     string $inherit = null
-)
-```
-
-### allowRole
-
-Sets a `Privilege` permission on one or more roles to allow them to do something. Removes any matching restrictions.
-
-```
-allowRole(
-    string|array|\BeatSwitch\Lock\Roles\Role $role,
-    string|array $action,
-    string|\BeatSwitch\Lock\Resources\Resource $resource = null,
-    int $resourceId = null,
-    \BeatSwitch\Lock\Permissions\Condition[] $conditions = []
-)
-```
-
-### denyRole
-
-Sets a `Restriction` permission on one or more roles to prevent them from doing something. Removes any matching privileges.
-
-```
-denyRole(
-    string|array|\BeatSwitch\Lock\Roles\Role $role,
-    string|array $action,
-    string|\BeatSwitch\Lock\Resources\Resource $resource = null,
-    int $resourceId = null,
-    \BeatSwitch\Lock\Permissions\Condition[] $conditions = []
 )
 ```
 
@@ -583,7 +594,7 @@ And we have a `RolePermission` model with the following database columns:
 - `resource_type` (varchar, 100, nullable)
 - `resource_id` (int, 11, nullable)
 
-Let's check out a full implementation of the driver below. Notice that for the `getPermissions` method we're using the `PermissionFactory` class to easily map the data and create `Permission` objects from them.
+Let's check out a full implementation of the driver below. Notice that for the `getCallerPermissions` method we're using the `PermissionFactory` class to easily map the data and create `Permission` objects from them.
 
 ```php
 <?php
@@ -603,7 +614,7 @@ class EloquentDriver implements Driver
      * @param \BeatSwitch\Lock\Callers\Caller $caller
      * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
-    public function getPermissions(Caller $caller)
+    public function getCallerPermissions(Caller $caller)
     {
         $permissions = CallerPermission::where('caller_type', $caller->getCallerType())
             ->where('caller_id', $caller->getCallerId())
@@ -619,7 +630,7 @@ class EloquentDriver implements Driver
      * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
-    public function storePermission(Caller $caller, Permission $permission)
+    public function storeCallerPermission(Caller $caller, Permission $permission)
     {
         $eloquentPermission = new CallerPermission;
         $eloquentPermission->caller_type = $caller->getCallerType();
@@ -638,7 +649,7 @@ class EloquentDriver implements Driver
      * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
-    public function removePermission(Caller $caller, Permission $permission)
+    public function removeCallerPermission(Caller $caller, Permission $permission)
     {
         CallerPermission::where('caller_type', $caller->getCallerType())
             ->where('caller_id', $caller->getCallerId())
@@ -656,7 +667,7 @@ class EloquentDriver implements Driver
      * @param \BeatSwitch\Lock\Permissions\Permission
      * @return bool
      */
-    public function hasPermission(Caller $caller, Permission $permission)
+    public function hasCallerPermission(Caller $caller, Permission $permission)
     {
         return (bool) CallerPermission::where('caller_type', $caller->getCallerType())
             ->where('caller_id', $caller->getCallerId())

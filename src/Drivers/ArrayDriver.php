@@ -15,7 +15,7 @@ class ArrayDriver implements Driver
      *
      * @var array
      */
-    protected $permissions = array();
+    protected $permissions = [];
 
     /**
      * Returns all the permissions for a caller
@@ -23,7 +23,7 @@ class ArrayDriver implements Driver
      * @param \BeatSwitch\Lock\Callers\Caller $caller
      * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
-    public function getPermissions(Caller $caller)
+    public function getCallerPermissions(Caller $caller)
     {
         $key = $this->getCallerKey($caller);
 
@@ -37,7 +37,7 @@ class ArrayDriver implements Driver
      * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
-    public function storePermission(Caller $caller, Permission $permission)
+    public function storeCallerPermission(Caller $caller, Permission $permission)
     {
         $this->permissions[$this->getCallerKey($caller)][] = $permission;
     }
@@ -49,11 +49,11 @@ class ArrayDriver implements Driver
      * @param \BeatSwitch\Lock\Permissions\Permission
      * @return void
      */
-    public function removePermission(Caller $caller, Permission $permission)
+    public function removeCallerPermission(Caller $caller, Permission $permission)
     {
         // Remove permissions which match the action and resource
         $this->permissions[$this->getCallerKey($caller)] = array_filter(
-            $this->getPermissions($caller),
+            $this->getCallerPermissions($caller),
             function (Permission $callerPermission) use ($permission) {
                 // Only keep permissions which don't exactly match the one which we're trying to remove.
                 return ! $callerPermission->matchesPermission($permission);
@@ -68,10 +68,10 @@ class ArrayDriver implements Driver
      * @param \BeatSwitch\Lock\Permissions\Permission
      * @return bool
      */
-    public function hasPermission(Caller $caller, Permission $permission)
+    public function hasCallerPermission(Caller $caller, Permission $permission)
     {
         // Iterate over each permission from the user and check if the permission is in the array.
-        foreach ($this->getPermissions($caller) as $callerPermission) {
+        foreach ($this->getCallerPermissions($caller) as $callerPermission) {
             // If a matching permission was found, immediately break the sequence and return true.
             if ($callerPermission->matchesPermission($permission)) {
                 return true;

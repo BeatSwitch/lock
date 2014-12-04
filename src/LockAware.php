@@ -1,22 +1,19 @@
 <?php
 namespace BeatSwitch\Lock;
 
-use BeatSwitch\Lock\Exceptions\InvalidCaller;
-use BeatSwitch\Lock\Exceptions\LockInstanceNotSet;
-
 /**
- * This trait can be used on objects which extend the Caller contract. After
- * setting the Lock instance with the setLock method, the caller receives
+ * This trait can be used on objects which extend the Caller or Role contract.
+ * After setting the Lock instance with the setLock method, the object receives
  * the ability to call the public api from the lock instance onto itself.
  */
 trait LockAware
 {
     /**
-     * The current caller's lock instance
+     * The current object's lock instance
      *
      * @var \BeatSwitch\Lock\Lock
      */
-    protected $lock;
+    private $lock;
 
     /**
      * Determine if one or more actions are allowed
@@ -56,7 +53,7 @@ trait LockAware
      * @param int $resourceId
      * @param \BeatSwitch\Lock\Permissions\Condition[] $conditions
      */
-    public function allow($action, $resource = null, $resourceId = null, array $conditions = array())
+    public function allow($action, $resource = null, $resourceId = null, array $conditions = [])
     {
         $this->assertLockInstanceIsSet();
 
@@ -71,7 +68,7 @@ trait LockAware
      * @param int $resourceId
      * @param \BeatSwitch\Lock\Permissions\Condition[] $conditions
      */
-    public function deny($action, $resource = null, $resourceId = null, array $conditions = array())
+    public function deny($action, $resource = null, $resourceId = null, array $conditions = [])
     {
         $this->assertLockInstanceIsSet();
 
@@ -96,13 +93,13 @@ trait LockAware
      * Sets the lock instance for this caller
      *
      * @param \BeatSwitch\Lock\Lock $lock
-     * @throws \BeatSwitch\Lock\Exceptions\InvalidCaller
+     * @throws \BeatSwitch\Lock\InvalidLockInstance
      */
     public function setLock(Lock $lock)
     {
-        // Make sure that the caller from the given lock instance is this caller.
-        if ($lock->getCaller() !== $this) {
-            throw new InvalidCaller('The caller from the given lock instance is different from the current caller.');
+        // Make sure that the subject from the given lock instance is this object.
+        if ($lock->getSubject() !== $this) {
+            throw new InvalidLockInstance('Invalid Lock instance given for current object.');
         }
 
         $this->lock = $lock;
@@ -111,7 +108,7 @@ trait LockAware
     /**
      * Makes sure that a valid lock instance is set before an api method is called
      *
-     * @throws \BeatSwitch\Lock\Exceptions\LockInstanceNotSet
+     * @throws \BeatSwitch\Lock\LockInstanceNotSet
      */
     private function assertLockInstanceIsSet()
     {

@@ -1,20 +1,19 @@
 <?php
-namespace stubs\BeatSwitch\Lock;
+namespace BeatSwitch\Lock\Callers;
 
-use BeatSwitch\Lock\Callers\Caller;
 use BeatSwitch\Lock\LockAware;
 
-class CallerStub implements Caller
+final class SimpleCaller implements Caller
 {
     use LockAware;
 
     /**
-     * @var int
+     * @var string
      */
     private $type;
 
     /**
-     * @var string
+     * @var int
      */
     private $id;
 
@@ -34,8 +33,9 @@ class CallerStub implements Caller
         $this->id = $id;
         $this->roles = $roles;
     }
+
     /**
-     * @return string
+     * @return null
      */
     public function getCallerType()
     {
@@ -43,8 +43,6 @@ class CallerStub implements Caller
     }
 
     /**
-     * The main identifier for the resource
-     *
      * @return int
      */
     public function getCallerId()
@@ -53,8 +51,6 @@ class CallerStub implements Caller
     }
 
     /**
-     * The caller's roles
-     *
      * @return array
      */
     public function getCallerRoles()

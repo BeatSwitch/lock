@@ -14,6 +14,7 @@ All notable changes to Lock will be documented in this file. This file follows t
 
 ### Changed
 
+- Massive refactor of the `Lock` and `Manager` classes
 - Moved interfaces to their own namespaces
 - Refactored most of the testing suite
 - Renamed the `AbstractPermission` class

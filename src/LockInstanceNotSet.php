@@ -1,5 +1,5 @@
 <?php
-namespace BeatSwitch\Lock\Exceptions;
+namespace BeatSwitch\Lock;
 
 class LockInstanceNotSet extends \Exception
 {
