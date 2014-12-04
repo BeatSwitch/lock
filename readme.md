@@ -581,7 +581,7 @@ Sets the lock instance for a role which implements the `LockAware` trait. Return
 
 ```
 makeRoleLockAware(
-    \BeatSwitch\Lock\Roles\Role $role
+    \BeatSwitch\Lock\Roles\Role|string $role
 )
 ```
 
