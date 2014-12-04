@@ -359,7 +359,7 @@ $lock->can('create', 'posts'); // true: the user has explicit permission to crea
 
 ### Working with conditions
 
-Conditions are actually asserts which are extra checks you can set for permissions. You can pass an array with them as the last parameter of `allow` and `deny`. All conditions must implement the `\BeatSwitch\Lock\Permissions\Condition` interface.
+Conditions are actually asserts which are extra checks you can set for permissions. You can pass an array with them as the last parameter of `allow` and `deny`. All conditions must implement the `BeatSwitch\Lock\Permissions\Condition` interface.
 
 > **Warning:** please note that conditions currently only work with static drivers.
 
@@ -467,7 +467,7 @@ $caller = $manager->makeCallerLockAware($caller);
 
 And now your caller will be able to use the `LockAware` methods. There's a similar method for roles.
 
-```
+```php
 $role = $manager->makeRoleLockAware('guest');
 ```
 
@@ -475,9 +475,9 @@ This will bootstrap a `SimpleRole` object which already comes with the `LockAwar
 
 ## Api
 
-### Lock
+### BeatSwitch\Lock\Lock
 
-The following methods can all be called on a `\BeatSwitch\Lock\Lock` instance.
+The following methods can all be called on a `BeatSwitch\Lock\Lock` instance.
 
 #### can
 
@@ -541,7 +541,7 @@ toggle(
 )
 ```
 
-### Manager
+### BeatSwitch\Lock\Manager
 
 The following methods can all be called on a `BeatSwitch\Lock\Manager` instance.
 
