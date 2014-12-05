@@ -71,8 +71,8 @@ class CallerLockSpec extends ObjectBehavior
 
     function it_can_work_with_permission_conditions()
     {
-        $this->allow('create', 'posts', null, [new TrueConditionStub()]);
-        $this->allow('create', 'pages', null, [new FalseConditionStub()]);
+        $this->allow('create', 'posts', null, new TrueConditionStub());
+        $this->allow('create', 'pages', null, new FalseConditionStub());
 
         $this->can('create', 'posts')->shouldReturn(true);
         $this->can('create', 'pages')->shouldReturn(false);

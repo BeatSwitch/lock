@@ -1,6 +1,7 @@
 <?php
 namespace BeatSwitch\Lock\Permissions;
 
+use BeatSwitch\Lock\Lock;
 use BeatSwitch\Lock\Resources\Resource;
 
 /**
@@ -11,11 +12,12 @@ interface Permission
     /**
      * Validate a permission against the given params
      *
+     * @param \BeatSwitch\Lock\Lock $lock
      * @param string $action
      * @param \BeatSwitch\Lock\Resources\Resource|null $resource
      * @return bool
      */
-    public function isAllowed($action, Resource $resource = null);
+    public function isAllowed(Lock $lock, $action, Resource $resource = null);
 
     /**
      * Determine if a permission exactly matches the current instance

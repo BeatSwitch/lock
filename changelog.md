@@ -21,6 +21,7 @@ All notable changes to Lock will be documented in this file. This file follows t
 - Renamed the `AbstractPermission` class
 - ArrayDriverTest moved to the `Drivers` namespace
 - Split the `LockTestCase` into `PersistentDriverTestCase` and `StaticDriverTestCase`
+- Conditions now get more parameters and can be used as a callback
 
 ### Removed
 

@@ -367,7 +367,9 @@ Let's setup a condition.
 ```php
 <?php
 
+use BeatSwitch\Lock\Lock;
 use BeatSwitch\Lock\Permissions\Condition;
+use BeatSwitch\Lock\Permissions\Permission;
 use BeatSwitch\Lock\Resources\Resource;
 use Illuminate\Auth\AuthManager;
 
@@ -391,11 +393,13 @@ class LoggedInCondition implements Condition
     /**
      * Assert if the condition is correct
      *
-     * @param string $action
-     * @param \BeatSwitch\Lock\Resources\Resource $resource
+     * @param \BeatSwitch\Lock\Lock $lock                         The current Lock instance that's being used
+     * @param \BeatSwitch\Lock\Permissions\Permission $permission The Permission that's being checked
+     * @param string $action                                      The action passed to the can or cannot method
+     * @param \BeatSwitch\Lock\Resources\Resource|null $resource  The resource passed to the can or cannot method
      * @return bool
      */
-    public function assert($action, Resource $resource)
+    public function assert(Lock $lock, Permission $permission, $action, Resource $resource = null)
     {
         // Condition will succeed if the user is logged in.
         return $this->auth->check();
@@ -408,11 +412,27 @@ Now let's see how this will work when setting up a permission.
 ```php
 $condition = App::make('LoggedInCondition');
 
-$lock->allow('create', 'posts', null, [$condition]);
+$lock->allow('create', 'posts', null, $condition);
 $lock->can('create', 'posts'); // true if logged in, otherwise false.
 ```
 
+You can also pass along multiple conditions.
+
+```php
+$lock->allow('create', 'posts', null, [$falseCondition, $trueCondition]);
+$lock->can('create', 'posts'); // false: there's at least one false condition
+```
+
 You can pass along as many conditions as you like but they all need to succeed in order for the permission to work.
+
+You can also use a callback if you like.
+
+```php
+$lock->allow('create', 'posts', null, function ($lock, $permission, $action, $resource = null) {
+    return false;
+});
+$lock->can('create', 'posts'); // false because the callback returns false.
+```
 
 ### Using the LockAware trait
 

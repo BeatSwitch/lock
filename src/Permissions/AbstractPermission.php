@@ -1,9 +1,11 @@
 <?php
 namespace BeatSwitch\Lock\Permissions;
 
+use BeatSwitch\Lock\Lock;
 use BeatSwitch\Lock\Resources\Resource;
+use Closure;
 
-abstract class AbstractPermission
+abstract class AbstractPermission implements Permission
 {
     /**
      * @var string
@@ -16,20 +18,20 @@ abstract class AbstractPermission
     protected $resource;
 
     /**
-     * @var \BeatSwitch\Lock\Permissions\Condition[]
+     * @var \BeatSwitch\Lock\Permissions\Condition[]|callable
      */
     protected $conditions;
 
     /**
      * @param string $action
      * @param \BeatSwitch\Lock\Resources\Resource|null $resource
-     * @param \BeatSwitch\Lock\Permissions\Condition[]
+     * @param \BeatSwitch\Lock\Permissions\Condition|\BeatSwitch\Lock\Permissions\Condition[]|callable $conditions
      */
-    public function __construct($action, Resource $resource = null, array $conditions = [])
+    public function __construct($action, Resource $resource = null, $conditions = [])
     {
         $this->action = $action;
         $this->resource = $resource;
-        $this->conditions = $conditions;
+        $this->setConditions($conditions);
     }
 
     /**
@@ -50,18 +52,23 @@ abstract class AbstractPermission
     /**
      * Validate a permission against the given params.
      *
+     * @param \BeatSwitch\Lock\Lock $lock
      * @param string $action
      * @param \BeatSwitch\Lock\Resources\Resource|null $resource
      * @return bool
      */
-    protected function resolve($action, Resource $resource = null)
+    protected function resolve(Lock $lock, $action, Resource $resource = null)
     {
         // If no resource was set for this permission we'll only need to check the action.
         if ($this->resource === null || $this->resource->getResourceType() === null) {
-            return $this->matchesAction($action) && $this->resolveConditions();
+            return $this->matchesAction($action) && $this->resolveConditions($lock, $action, $resource);
         }
 
-        return $this->matchesAction($action) && $this->matchesResource($resource) && $this->resolveConditions();
+        return (
+            $this->matchesAction($action) &&
+            $this->matchesResource($resource) &&
+            $this->resolveConditions($lock, $action, $resource)
+        );
     }
 
     /**
@@ -114,14 +121,37 @@ abstract class AbstractPermission
     }
 
     /**
+     * Sets the conditions for this permission
+     *
+     * @param \BeatSwitch\Lock\Permissions\Condition|\BeatSwitch\Lock\Permissions\Condition[]|callable $conditions
+     */
+    protected function setConditions($conditions = [])
+    {
+        if ($conditions instanceof Closure || is_array($conditions)) {
+            $this->conditions = $conditions;
+        } else {
+            $this->conditions = [$conditions];
+        }
+    }
+
+    /**
      * Check all the conditions and make sure they all return true
      *
+     * @param \BeatSwitch\Lock\Lock $lock
+     * @param string $action
+     * @param \BeatSwitch\Lock\Resources\Resource|null $resource
      * @return bool
      */
-    protected function resolveConditions()
+    protected function resolveConditions(Lock $lock, $action, $resource)
     {
+        // If the given condition is a callback, execute it.
+        if ($this->conditions instanceof Closure) {
+            return call_user_func($this->conditions, [$lock, $this, $action, $resource]);
+        }
+
+        // If the conditions are a list of Condition objects, check them all.
         foreach ($this->conditions as $condition) {
-            if (! $condition->assert($this->action, $this->resource)) {
+            if (! $condition->assert($lock, $this, $action, $resource)) {
                 return false;
             }
         }

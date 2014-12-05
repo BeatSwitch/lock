@@ -61,9 +61,9 @@ abstract class Lock
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
-     * @param \BeatSwitch\Lock\Permissions\Condition[] $conditions
+     * @param \BeatSwitch\Lock\Permissions\Condition|\BeatSwitch\Lock\Permissions\Condition[]|callable $conditions
      */
-    public function allow($action, $resource = null, $resourceId = null, array $conditions = [])
+    public function allow($action, $resource = null, $resourceId = null, $conditions = [])
     {
         $actions = (array) $action;
         $resource = $this->convertResourceToObject($resource, $resourceId);
@@ -71,7 +71,7 @@ abstract class Lock
 
         foreach ($actions as $action) {
             foreach ($permissions as $key => $permission) {
-                if ($permission instanceof Restriction && ! $permission->isAllowed($action, $resource)) {
+                if ($permission instanceof Restriction && ! $permission->isAllowed($this, $action, $resource)) {
                     $this->removePermission($permission);
                     unset($permissions[$key]);
                 }
@@ -94,9 +94,9 @@ abstract class Lock
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
-     * @param \BeatSwitch\Lock\Permissions\Condition[] $conditions
+     * @param \BeatSwitch\Lock\Permissions\Condition|\BeatSwitch\Lock\Permissions\Condition[]|callable $conditions
      */
-    public function deny($action, $resource = null, $resourceId = null, array $conditions = [])
+    public function deny($action, $resource = null, $resourceId = null, $conditions = [])
     {
         $actions = (array) $action;
         $resource = $this->convertResourceToObject($resource, $resourceId);
@@ -104,7 +104,7 @@ abstract class Lock
 
         foreach ($actions as $action) {
             foreach ($permissions as $key => $permission) {
-                if ($permission instanceof Privilege && $permission->isAllowed($action, $resource)) {
+                if ($permission instanceof Privilege && $permission->isAllowed($this, $action, $resource)) {
                     $this->removePermission($permission);
                     unset($permissions[$key]);
                 }
@@ -157,7 +157,7 @@ abstract class Lock
     {
         foreach ($permissions as $permission) {
             // If we've found a matching restriction, return false.
-            if ($permission instanceof Restriction && ! $permission->isAllowed($action, $resource)) {
+            if ($permission instanceof Restriction && ! $permission->isAllowed($this, $action, $resource)) {
                 return false;
             }
         }
@@ -178,7 +178,7 @@ abstract class Lock
         // Search for privileges in the permissions.
         foreach ($permissions as $permission) {
             // If we've found a valid privilege, return true.
-            if ($permission instanceof Privilege && $permission->isAllowed($action, $resource)) {
+            if ($permission instanceof Privilege && $permission->isAllowed($this, $action, $resource)) {
                 return true;
             }
         }
