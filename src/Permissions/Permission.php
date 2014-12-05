@@ -58,7 +58,7 @@ interface Permission
     /**
      * The resource's identifier
      *
-     * @return id|null
+     * @return int|null
      */
     public function getResourceId();
 }

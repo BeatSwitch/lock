@@ -18,14 +18,14 @@ abstract class AbstractPermission implements Permission
     protected $resource;
 
     /**
-     * @var \BeatSwitch\Lock\Permissions\Condition[]|callable
+     * @var \BeatSwitch\Lock\Permissions\Condition[]|\Closure
      */
     protected $conditions;
 
     /**
      * @param string $action
      * @param \BeatSwitch\Lock\Resources\Resource|null $resource
-     * @param \BeatSwitch\Lock\Permissions\Condition|\BeatSwitch\Lock\Permissions\Condition[]|callable $conditions
+     * @param \BeatSwitch\Lock\Permissions\Condition|\BeatSwitch\Lock\Permissions\Condition[]|\Closure $conditions
      */
     public function __construct($action, Resource $resource = null, $conditions = [])
     {
@@ -123,7 +123,7 @@ abstract class AbstractPermission implements Permission
     /**
      * Sets the conditions for this permission
      *
-     * @param \BeatSwitch\Lock\Permissions\Condition|\BeatSwitch\Lock\Permissions\Condition[]|callable $conditions
+     * @param \BeatSwitch\Lock\Permissions\Condition|\BeatSwitch\Lock\Permissions\Condition[]|\Closure $conditions
      */
     protected function setConditions($conditions = [])
     {
@@ -144,12 +144,12 @@ abstract class AbstractPermission implements Permission
      */
     protected function resolveConditions(Lock $lock, $action, $resource)
     {
-        // If the given condition is a callback, execute it.
+        // If the given condition is a closure, execute it.
         if ($this->conditions instanceof Closure) {
-            return call_user_func($this->conditions, [$lock, $this, $action, $resource]);
+            return call_user_func($this->conditions, $lock, $this, $action, $resource);
         }
 
-        // If the conditions are a list of Condition objects, check them all.
+        // If the conditions are an array of Condition objects, check them all.
         foreach ($this->conditions as $condition) {
             if (! $condition->assert($lock, $this, $action, $resource)) {
                 return false;
