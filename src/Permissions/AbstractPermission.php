@@ -72,17 +72,6 @@ abstract class AbstractPermission implements Permission
     }
 
     /**
-     * Check if the given type is equal to the permission's type
-     *
-     * @param string $type
-     * @return bool
-     */
-    protected function matchesType($type)
-    {
-        return $this->getType() === $type;
-    }
-
-    /**
      * Validate the action
      *
      * @param string $action
