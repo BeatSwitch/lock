@@ -564,26 +564,6 @@ role(
 )
 ```
 
-#### makeCallerLockAware
-
-Sets the lock instance for a caller which implements the `LockAware` trait. Returns the caller with the lock instance set.
-
-```
-makeCallerLockAware(
-    \BeatSwitch\Lock\Callers\Caller $caller
-)
-```
-
-#### makeRoleLockAware
-
-Sets the lock instance for a role which implements the `LockAware` trait. Returns the role with the lock instance set.
-
-```
-makeRoleLockAware(
-    \BeatSwitch\Lock\Roles\Role|string $role
-)
-```
-
 #### alias
 
 Add an alias for one or more actions.
@@ -603,6 +583,26 @@ Set one or more roles and an optional role to inherit permissions from.
 setRole(
     string|array $name,
     string $inherit = null
+)
+```
+
+#### makeCallerLockAware
+
+Sets the lock instance for a caller which implements the `LockAware` trait. Returns the caller with the lock instance set.
+
+```
+makeCallerLockAware(
+    \BeatSwitch\Lock\Callers\Caller $caller
+)
+```
+
+#### makeRoleLockAware
+
+Sets the lock instance for a role which implements the `LockAware` trait. Returns the role with the lock instance set.
+
+```
+makeRoleLockAware(
+    \BeatSwitch\Lock\Roles\Role|string $role
 )
 ```
 
