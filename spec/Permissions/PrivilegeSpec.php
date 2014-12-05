@@ -1,7 +1,7 @@
 <?php
 namespace spec\BeatSwitch\Lock\Permissions;
 
-use BeatSwitch\Lock\Lock;
+use BeatSwitch\Lock\Callers\CallerLock;
 use BeatSwitch\Lock\Resources\SimpleResource;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -19,7 +19,7 @@ class PrivilegeSpec extends ObjectBehavior
         $this->shouldImplement('BeatSwitch\Lock\Permissions\Permission');
     }
 
-    function it_can_validate_itself_against_parameters(Lock $lock)
+    function it_can_validate_itself_against_parameters(CallerLock $lock)
     {
         $this->isAllowed($lock, 'edit', new SimpleResource('events', 1))->shouldReturn(true);
         $this->isAllowed($lock, 'edit', new SimpleResource('events', 1))->shouldReturn(true);
@@ -32,7 +32,7 @@ class PrivilegeSpec extends ObjectBehavior
         $this->matchesPermission($this)->shouldReturn(true);
     }
 
-    function it_fails_with_a_false_condition(Lock $lock)
+    function it_fails_with_a_false_condition(CallerLock $lock)
     {
         $this->beConstructedWith('edit', new SimpleResource('events', 1), function () {
             return false;
