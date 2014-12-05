@@ -137,6 +137,52 @@ abstract class Lock
     }
 
     /**
+     * Returns the allowed ids which match the given action and resource type
+     *
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resourceType
+     * @return array
+     */
+    public function allowed($action, $resourceType)
+    {
+        $resourceType = $resourceType instanceof Resource ? $resourceType->getResourceType() : $resourceType;
+
+        // Get all the ids from privileges which match the given resource type.
+        $ids = array_unique(array_map(function (Permission $permission) {
+            return $permission->getResourceId();
+        }, array_filter($this->getPermissions(), function (Permission $permission) use ($resourceType) {
+            return $permission instanceof Privilege && $permission->getResourceType() === $resourceType;
+        })));
+
+        return array_values(array_filter($ids, function ($id) use ($action, $resourceType) {
+            return $this->can($action, $resourceType, $id);
+        }));
+    }
+
+    /**
+     * Returns the denied ids which match the given action and resource type
+     *
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resourceType
+     * @return array
+     */
+    public function denied($action, $resourceType)
+    {
+        $resourceType = $resourceType instanceof Resource ? $resourceType->getResourceType() : $resourceType;
+
+        // Get all the ids from restrictions which match the given resource type.
+        $ids = array_unique(array_map(function (Permission $permission) {
+            return $permission->getResourceId();
+        }, array_filter($this->getPermissions(), function (Permission $permission) use ($resourceType) {
+            return $permission instanceof Restriction && $permission->getResourceType() === $resourceType;
+        })));
+
+        return array_values(array_filter($ids, function ($id) use ($action, $resourceType) {
+            return $this->cannot($action, $resourceType, $id);
+        }));
+    }
+
+    /**
      * Determine if an action is allowed
      *
      * @param string $action

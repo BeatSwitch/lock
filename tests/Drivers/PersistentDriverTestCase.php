@@ -314,4 +314,37 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($role->can('create', 'users'));
     }
+
+    /** @test */
+    final function it_can_return_allowed_resource_ids()
+    {
+        $this->getCallerLock()->allow('update', 'users', 1);
+        $this->getCallerLock()->allow('update', 'users', 2);
+        $this->getCallerLock()->allow('update', 'events', 4);
+        $this->getCallerLock()->allow(['update', 'delete'], 'users', 3);
+        $this->getCallerLock()->allow(['update', 'delete'], 'users', 5);
+        $this->getCallerLock()->allow('delete', 'users', 2);
+        $this->getCallerLock()->deny('update', 'users', 2);
+
+        $this->assertEquals([1, 3, 5], $this->getCallerLock()->allowed('update', 'users'));
+        $this->assertEquals([3, 5, 2], $this->getCallerLock()->allowed('delete', 'users'));
+        $this->assertEquals([3, 5], $this->getCallerLock()->allowed(['update', 'delete'], 'users'));
+    }
+
+    /** @test */
+    final function it_can_return_denied_resource_ids()
+    {
+        $this->getCallerLock()->allow('update', 'users', 1);
+        $this->getCallerLock()->allow('update', 'users', 2);
+        $this->getCallerLock()->allow('update', 'events', 4);
+        $this->getCallerLock()->allow(['update', 'delete'], 'users', 3);
+        $this->getCallerLock()->allow(['update', 'delete'], 'users', 5);
+        $this->getCallerLock()->deny('delete', 'users', 1);
+        $this->getCallerLock()->allow('delete', 'users', 2);
+        $this->getCallerLock()->deny('update', 'users', 2);
+
+        $this->assertEquals([2], $this->getCallerLock()->denied('update', 'users'));
+        $this->assertEquals([1], $this->getCallerLock()->denied('delete', 'users'));
+        $this->assertEquals([1, 2], $this->getCallerLock()->denied(['update', 'delete'], 'users'));
+    }
 }

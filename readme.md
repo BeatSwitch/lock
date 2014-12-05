@@ -34,6 +34,7 @@ Made possible thanks to [BeatSwitch](https://beatswitch.com). Inspired by [Autho
     - [Setting a God caller](#setting-a-god-caller)
     - [Working with roles](#working-with-roles)
     - [Working with conditions](#working-with-conditions)
+    - [Retrieving allowed or denied resources](#retrieving-allowed-or-denied-resources)
     - [Using the LockAware trait](#using-the-lockaware-trait)
 - [Api](#api)
 - [Building a driver](#building-a-driver)
@@ -434,6 +435,22 @@ $lock->allow('create', 'posts', null, function ($lock, $permission, $action, $re
 $lock->can('create', 'posts'); // false because the callback returns false.
 ```
 
+### Retrieving allowed or denied resources
+
+If you'd like to retrieve a list of resources which are allowed or denied to perform a particularly action you can use the `allowed` and `denied` methods on a `Lock` instance.
+
+```php
+$lock->allow('update', 'users', 1);
+$lock->allow('update', 'users', 2);
+$lock->allow('update', 'users', 3);
+$lock->deny('update', 'users', 2);
+
+$lock->allowed('update', 'users'); // Returns [1, 3];
+$lock->denied('update', 'users'); // Returns [2];
+```
+
+> Please keep in mind that you can only retrieve id's from resources which have permissions set. Resources which aren't registered through Lock won't be returned.
+
 ### Using the LockAware trait
 
 You can easily add acl functionality to your caller or role by implementing the `BeatSwitch\Lock\LockAware` trait.
@@ -557,6 +574,28 @@ toggle(
     string|array $action,
     string|\BeatSwitch\Lock\Resources\Resource $resource = null,
     int $resourceId = null
+)
+```
+
+#### allowed
+
+Returns all the id's in an array of the given resource type to which the subject is allowed to perform the given action on.
+
+```
+allowed(
+    string|array $action,
+    string|\BeatSwitch\Lock\Resources\Resource $resourceType
+)
+```
+
+#### denied
+
+Returns all the id's in an array of the given resource type to which the subject is denied to perform the given action on.
+
+```
+denied(
+    string|array $action,
+    string|\BeatSwitch\Lock\Resources\Resource $resourceType
 )
 ```
 

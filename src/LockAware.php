@@ -90,6 +90,34 @@ trait LockAware
     }
 
     /**
+     * Returns the allowed ids which match the given action and resource type
+     *
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resourceType
+     * @return array
+     */
+    public function allowed($action, $resourceType)
+    {
+        $this->assertLockInstanceIsSet();
+
+        return $this->lock->allowed($action, $resourceType);
+    }
+
+    /**
+     * Returns the denied ids which match the given action and resource type
+     *
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resourceType
+     * @return array
+     */
+    public function denied($action, $resourceType)
+    {
+        $this->assertLockInstanceIsSet();
+
+        return $this->lock->denied($action, $resourceType);
+    }
+
+    /**
      * Sets the lock instance for this caller
      *
      * @param \BeatSwitch\Lock\Lock $lock
