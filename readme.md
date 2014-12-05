@@ -825,7 +825,7 @@ class EloquentDriverTest extends PersistentDriverTestCase
 }
 ```
 
-And this is all you need! The `PersistentDriverTestCase` contains all the tests you'll need to make sure your driver works as expected. So if all those tests pass then your driver was set up correctly. No need to mock anything, this is a pure integration test case. Of course in this specific case for Eloquent to work you'll need to bootstrap Laravel. Working with an DB like sqlite would be the best way here to test your driver. 
+And this is all you need! The `PersistentDriverTestCase` contains all the tests you'll need to make sure your driver works as expected. So if all those tests pass then your driver was set up correctly. No need to mock anything, this is a pure integration test case. Of course in this specific case for Eloquent to work you'll need to bootstrap Laravel. Working with a database like sqlite would be the best way here to test your driver. 
 
 ## Maintainer
 
