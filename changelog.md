@@ -2,7 +2,7 @@
 
 All notable changes to Lock will be documented in this file. This file follows the *[Keep a CHANGELOG](http://keepachangelog.com/)* standards.
 
-## Unreleased
+## 1.0.0-alpha.2 - 2014-12-05
 
 ### Added
 
@@ -22,7 +22,8 @@ All notable changes to Lock will be documented in this file. This file follows t
 - Renamed the `AbstractPermission` class
 - ArrayDriverTest moved to the `Drivers` namespace
 - Split the `LockTestCase` into `PersistentDriverTestCase` and `StaticDriverTestCase`
-- Conditions now get more parameters and can be used as a callback
+- The `assert` method of conditions now get more parameters
+- Conditions can now be used as a callback
 
 ### Removed
 
