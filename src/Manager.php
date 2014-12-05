@@ -37,7 +37,7 @@ class Manager
      * @param \BeatSwitch\Lock\Callers\Caller $caller
      * @return \BeatSwitch\Lock\Callers\CallerLock
      */
-    public function getCallerLock(Caller $caller)
+    public function caller(Caller $caller)
     {
         return LockFactory::makeCallerLock($caller, $this);
     }
@@ -48,7 +48,7 @@ class Manager
      * @param \BeatSwitch\Lock\Roles\Role|string $role
      * @return \BeatSwitch\Lock\Roles\RoleLock
      */
-    public function getRoleLock($role)
+    public function role($role)
     {
         return LockFactory::makeRoleLock($this->convertRoleToObject($role), $this);
     }
@@ -61,7 +61,7 @@ class Manager
      */
     public function makeCallerLockAware(Caller $caller)
     {
-        $lock = $this->getCallerLock($caller);
+        $lock = $this->caller($caller);
 
         $caller->setLock($lock);
 
@@ -77,7 +77,7 @@ class Manager
     public function makeRoleLockAware($role)
     {
         $role = $this->convertRoleToObject($role);
-        $lock = $this->getRoleLock($role);
+        $lock = $this->role($role);
 
         $role->setLock($lock);
 

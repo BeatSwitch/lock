@@ -20,12 +20,12 @@ class ManagerSpec extends ObjectBehavior
 
     function it_can_instantiate_a_new_lock_instance_for_a_caller()
     {
-        $this->getCallerLock(new SimpleCaller('users', 1))->shouldBeAnInstanceOf('BeatSwitch\Lock\Callers\CallerLock');
+        $this->caller(new SimpleCaller('users', 1))->shouldBeAnInstanceOf('BeatSwitch\Lock\Callers\CallerLock');
     }
 
     function it_can_instantiate_a_new_lock_instance_for_a_role()
     {
-        $this->getRoleLock('editor')->shouldBeAnInstanceOf('BeatSwitch\Lock\Roles\RoleLock');
+        $this->role('editor')->shouldBeAnInstanceOf('BeatSwitch\Lock\Roles\RoleLock');
     }
 
     function it_can_make_a_caller_lock_aware()

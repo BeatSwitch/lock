@@ -168,7 +168,7 @@ use \BeatSwitch\Lock\Manager;
 $manager = new Manager(new ArrayDriver());
 
 // Instantiate a new Lock instance for an object which implements the Caller contract.
-$lock = $manager->getCallerLock($caller);
+$lock = $manager->caller($caller);
 
 // Set some permissions.
 $lock->allow('manage_settings');
@@ -209,7 +209,7 @@ class UserManagementController extends BaseController
 
         $user = User::find($userId);
 
-        $this->lockManager->getCallerLock($user)->toggle($action, $resource);
+        $this->lockManager->caller($user)->toggle($action, $resource);
 
         return Redirect::route('user_management');
     }
@@ -322,20 +322,20 @@ Let's set some permissions and see how they are resolved.
 
 ```php
 // Allow a guest to read everything.
-$manager->getRoleLock('guest')->allow('guest', 'read');
+$manager->role('guest')->allow('guest', 'read');
 
 // Allow a user to create posts.
-$manager->getRoleLock('user')->allow('create', 'posts');
+$manager->role('user')->allow('create', 'posts');
 
 // Allow an editor and admin to publish posts.
-$manager->getRoleLock('editor')->allow('publish', 'posts');
-$manager->getRoleLock('admin')->allow('publish', 'posts');
+$manager->role('editor')->allow('publish', 'posts');
+$manager->role('admin')->allow('publish', 'posts');
 
 // Allow an admin to delete posts.
-$manager->getRoleLock('admin')->allow('delete', 'posts');
+$manager->role('admin')->allow('delete', 'posts');
 
 // Let's assume our caller has the role of "editor" and check some permissions.
-$lock = $manager->getCallerLock($caller);
+$lock = $manager->caller($caller);
 $lock->can('read'); // true
 $lock->can('delete', 'posts'); // false
 $lock->can('publish'); // false: we can't publish everything, just posts.
@@ -347,14 +347,13 @@ Something you need to be aware of is that caller-level permissions supersede rol
 Our caller will have the user role.
 
 ```php
-$lock = $manager->getCallerLock($caller);
-$lock->allow('create', 'posts');
+$manager->caller($caller)->allow('create', 'posts');
 
 // Notice that we don't need to set the role in the
 // manager first if we don't care about inheritance.
-$manager->getRoleLock('user')->deny('user', 'create', 'posts');
+$manager->role('user')->deny('user', 'create', 'posts');
 
-$lock->can('create', 'posts'); // true: the user has explicit permission to create posts.
+$manager->caller($caller)->can('create', 'posts'); // true: the user has explicit permission to create posts.
 ```
 
 ### Working with conditions
@@ -545,22 +544,22 @@ toggle(
 
 The following methods can all be called on a `BeatSwitch\Lock\Manager` instance.
 
-#### getCallerLock
+#### caller
 
 Returns a `BeatSwitch\Lock\Lock` instance for a caller.
 
 ```
-getCallerLock(
+caller(
     \BeatSwitch\Lock\Callers\Caller $caller
 )
 ```
 
-#### getRoleLock
+#### role
 
 Returns a `BeatSwitch\Lock\Lock` instance for a role.
 
 ```
-getRoleLock(
+role(
     \BeatSwitch\Lock\Roles\Role $role
 )
 ```

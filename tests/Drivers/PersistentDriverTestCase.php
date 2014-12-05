@@ -48,7 +48,7 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
      */
     protected function getCallerLock()
     {
-        return $this->manager->getCallerLock($this->caller);
+        return $this->manager->caller($this->caller);
     }
 
     /**
@@ -57,7 +57,7 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
      */
     protected function getRoleLock($role)
     {
-        return $this->manager->getRoleLock($role);
+        return $this->manager->role($role);
     }
 
     /** @test */

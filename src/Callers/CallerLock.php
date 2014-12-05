@@ -103,7 +103,7 @@ class CallerLock extends Lock
     protected function getLockInstancesForCallerRoles()
     {
         return array_map(function ($role) {
-            return $this->manager->getRoleLock($role);
+            return $this->manager->role($role);
         }, $this->caller->getCallerRoles());
     }
 
