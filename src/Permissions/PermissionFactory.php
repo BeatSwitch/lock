@@ -16,15 +16,18 @@ class PermissionFactory
         return array_map(function ($permission) {
             $type = $permission['type'];
 
+            // Make sure the id is typecast to an integer.
+            $id = ! is_null($permission['resource_id']) ? (int) $permission['resource_id'] : null;
+
             if ($type === Privilege::TYPE) {
                 return new Privilege(
                     $permission['action'],
-                    new SimpleResource($permission['resource_type'], $permission['resource_id'])
+                    new SimpleResource($permission['resource_type'], $id)
                 );
             } elseif ($type === Restriction::TYPE) {
                 return new Restriction(
                     $permission['action'],
-                    new SimpleResource($permission['resource_type'], $permission['resource_id'])
+                    new SimpleResource($permission['resource_type'], $id)
                 );
             } else {
                 throw new InvalidPermissionType("The permission type you provided \"$type\" is incorrect.");
