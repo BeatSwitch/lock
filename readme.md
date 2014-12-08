@@ -82,7 +82,7 @@ The `Manager` allows for an easy way to instantiate new `Lock` instances, set ac
 If you need a framework-specific implementation, pick one of the already prepared drivers below.
 
 - ArrayDriver (ships with this package)
-- Laravel (coming soon)
+- [Laravel](https://github.com/BeatSwitch/lock-laravel)
 
 ## Roadmap
 
@@ -184,7 +184,7 @@ $lock->can('delete', 'events'); // false: cannot delete events
 
 ### Working with a persistent driver
 
-Working with **a persistent driver** allows you to store permissions to a persistent storage layer and adjust them during runtime. For example, if you'd implement the Laravel driver, it would store the permissions to a database using Laravel's database component. By creating your own UI, you could easily attach the acl functionality from this package to create, for example, a user management system where different users have different permissions.
+Working with **a persistent driver** allows you to store permissions to a persistent storage layer and adjust them during runtime. For example, if you'd implement [the Laravel driver](https://github.com/BeatSwitch/lock-laravel), it would store the permissions to a database using Laravel's database component. By creating your own UI, you could easily attach the acl functionality from this package to create, for example, a user management system where different users have different permissions.
 
 Let's take a look at a very basic user management controller to see how that's done. We'll assume we get a bootstrapped lock manager instance with our Laravel DB driver.
 
