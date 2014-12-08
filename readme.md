@@ -848,16 +848,16 @@ It's very easy for you to make sure your driver works as expected. If you're bui
 ```php
 <?php
 
-use tests\BeatSwitch\Lock\Drivers\PersistentDriverTestCase;
+use BeatSwitch\Lock\Tests\PersistentDriverTestCase;
 
 class EloquentDriverTest extends PersistentDriverTestCase
 {
     public function setUp()
     {
+        // Don't forget to reset your DB here.
+        
         // Bootstrap your driver.
         $this->driver = new EloquentDriver();
-
-        // Don't forget to reset your DB here.
 
         parent::setUp();
     }
