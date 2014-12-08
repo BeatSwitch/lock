@@ -95,7 +95,7 @@ If you need a framework-specific implementation, pick one of the already prepare
 Install this package through Composer.
 
 ```bash
-composer require beatswitch/lock
+$ composer require beatswitch/lock
 ```
 
 ## Usage
