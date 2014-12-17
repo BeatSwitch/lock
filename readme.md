@@ -686,7 +686,7 @@ And we have a `RolePermission` model with the following database columns:
 - `resource_type` (varchar, 100, nullable)
 - `resource_id` (int, 11, nullable)
 
-Let's check out a full implementation of the driver below. Notice that for the `getCallerPermissions` method we're using the `PermissionFactory` class to easily map the data and create `Permission` objects from them.
+Let's check out a full implementation of the driver below. Notice that for the `getCallerPermissions` method we're using the `PermissionFactory` class to easily map the data and create `Permission` objects from them. The `PermissionFactory`'s `createFromData` method will accept both arrays and objects.
 
 ```php
 <?php
@@ -712,7 +712,7 @@ class EloquentDriver implements Driver
             ->where('caller_id', $caller->getCallerId())
             ->get();
 
-        return PermissionFactory::createFromArray($permissions->toArray());
+        return PermissionFactory::createFromData($permissions->toArray());
     }
 
     /**
@@ -780,7 +780,7 @@ class EloquentDriver implements Driver
     {
         $permissions = RolePermission::where('role', $role->getRoleName())->get();
 
-        return PermissionFactory::createFromArray($permissions->toArray());
+        return PermissionFactory::createFromData($permissions->toArray());
     }
 
     /**

@@ -2,6 +2,16 @@
 
 All notable changes to Lock will be documented in this file. This file follows the *[Keep a CHANGELOG](http://keepachangelog.com/)* standards.
 
+## Unreleased
+
+### Changed
+
+- Renamed the `createFromArray` method on the `PermissionFactory` to `createFromData`
+
+### Fixed
+
+- Fixed a bug where only array data could be passed to the `PermissionFactory`
+
 ## 1.0.0-alpha.2 - 2014-12-05
 
 ### Added
