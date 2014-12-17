@@ -26,10 +26,11 @@ abstract class Lock
     {
         $actions = (array) $action;
         $resource = $this->convertResourceToObject($resource, $resourceId);
+        $permissions = $this->getPermissions();
 
         foreach ($actions as $action) {
             if ($aliases = $this->getAliasesForAction($action)) {
-                if ($this->can($aliases, $resource)) {
+                if ($this->can($aliases, $resource) && $this->resolveRestrictions($permissions, $action, $resource)) {
                     return true;
                 }
             }

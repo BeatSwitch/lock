@@ -236,12 +236,7 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->caller->can('update'));
     }
 
-    /**
-     * @test
-     *
-     * @todo Verify if the last assert of the "manage" action is the expected behavior
-     * @todo Fix this test
-     */
+    /** @test */
     final function it_can_check_actions_from_aliases()
     {
         $this->manager->alias('manage', ['create', 'read', 'update', 'delete']);
@@ -256,12 +251,12 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
         $this->assertTrue($lock->can('read', 'accounts'));
         $this->assertTrue($lock->can(['read', 'update'], 'accounts'));
 
-//        // If one of the aliased actions is explicitly denied, it cannot pass anymore.
-//        $lock->deny('create');
-//
-//        $this->assertFalse($lock->can('manage', 'accounts'));
-//        $this->assertFalse($lock->can('create', 'accounts'));
-//        $this->assertTrue($lock->can(['read', 'update', 'delete'], 'accounts'));
+        // If one of the aliased actions is explicitly denied, it cannot pass anymore.
+        $lock->deny('create');
+
+        $this->assertTrue($lock->can('manage', 'accounts'));
+        $this->assertFalse($lock->can('create', 'accounts'));
+        $this->assertTrue($lock->can(['read', 'update', 'delete'], 'accounts'));
     }
 
     /** @test */
