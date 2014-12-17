@@ -2,7 +2,7 @@
 
 All notable changes to Lock will be documented in this file. This file follows the *[Keep a CHANGELOG](http://keepachangelog.com/)* standards.
 
-## Unreleased
+## 0.1.0 - 2014-12-17
 
 ### Changed
 
