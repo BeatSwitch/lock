@@ -2,7 +2,6 @@
 
 /spec export-ingore
 /stubs export-ignore
-/tests export-ignore
 /.gitattributes export-ignore
 /.gitignore export-ignore
 /.scrutinizer.yml export-ignore

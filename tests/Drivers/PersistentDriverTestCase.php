@@ -1,5 +1,5 @@
 <?php
-namespace BeatSwitch\Lock\Tests;
+namespace tests\BeatSwitch\Lock\Drivers;
 
 use BeatSwitch\Lock\Callers\SimpleCaller;
 use BeatSwitch\Lock\Manager;

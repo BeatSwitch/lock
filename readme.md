@@ -848,7 +848,7 @@ It's very easy for you to make sure your driver works as expected. If you're bui
 ```php
 <?php
 
-use BeatSwitch\Lock\Tests\PersistentDriverTestCase;
+use tests\BeatSwitch\Lock\Drivers\PersistentDriverTestCase;
 
 class EloquentDriverTest extends PersistentDriverTestCase
 {
