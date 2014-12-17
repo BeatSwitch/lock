@@ -1,5 +1,5 @@
 <?php
-namespace tests\BeatSwitch\Lock\Drivers;
+namespace BeatSwitch\Lock\Tests;
 
 use stubs\BeatSwitch\Lock\FalseConditionStub;
 use stubs\BeatSwitch\Lock\TrueConditionStub;
