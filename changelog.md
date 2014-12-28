@@ -13,7 +13,7 @@ All notable changes to Lock will be documented in this file. This file follows t
 - Fixed a bug where only array data could be passed to the `PermissionFactory`
 - Fixed a bug where a action alias got denied but was still accepted
 
-## 1.0.0-alpha.2 - 2014-12-05
+## 0.1.0-alpha.2 - 2014-12-05
 
 ### Added
 
@@ -45,6 +45,6 @@ All notable changes to Lock will be documented in this file. This file follows t
 - Require `PHP >=5.4` in the `composer.json` file
 - Various documentation fixes in `readme.md`
 
-## 1.0.0-alpha.1 - 2014-11-21
+## 0.1.0-alpha.1 - 2014-11-21
 
 First public alpha release.
