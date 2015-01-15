@@ -11,7 +11,7 @@
 
 Lock is a flexible, driver based **Acl** package for **PHP 5.4+**.
 
-Made possible thanks to [BeatSwitch](https://beatswitch.com). Inspired by [Authority](https://github.com/machuga/authority) by [Matthew Machuga](https://twitter.com/machuga). Logo by [Jerry Low](http://www.jerrylow.com).
+Created by [Dries Vints](https://twitter.com/driesvints). Made possible thanks to [BeatSwitch](https://beatswitch.com). Inspired by [Authority](https://github.com/machuga/authority) by [Matthew Machuga](https://twitter.com/machuga). Logo by [Jerry Low](http://www.jerrylow.com).
 
 [Come work with us at BeatSwitch!](http://creativeskills.be/jobs/php-development/php-developer-beatswitch-14-10-14.html)
 
@@ -862,7 +862,7 @@ class EloquentDriverTest extends PersistentDriverTestCase
 }
 ```
 
-And this is all you need! The `PersistentDriverTestCase` contains all the tests you'll need to make sure your driver works as expected. So if all those tests pass then your driver was set up correctly. No need to mock anything, this is a pure integration test case. Of course in this specific case for Eloquent to work you'll need to bootstrap Laravel. Working with a database like sqlite would be the best way here to test your driver. 
+And this is all you need! The `PersistentDriverTestCase` contains all the tests you'll need to make sure your driver works as expected. So if all those tests pass then your driver was set up correctly. No need to mock anything, this is a pure integration test case. Of course in this specific example above, for Eloquent to work you'll need to bootstrap Laravel. Working with a database like sqlite would be the best way here to test your driver. 
 
 ## Maintainer
 
