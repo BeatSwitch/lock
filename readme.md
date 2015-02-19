@@ -13,7 +13,7 @@ Lock is a flexible, driver based **Acl** package for **PHP 5.4+**.
 
 Created by [Dries Vints](https://twitter.com/driesvints). Made possible thanks to [BeatSwitch](https://beatswitch.com). Inspired by [Authority](https://github.com/machuga/authority) by [Matthew Machuga](https://twitter.com/machuga). Logo by [Jerry Low](http://www.jerrylow.com).
 
-[Come work with us at BeatSwitch!](http://creativeskills.be/jobs/php-development/php-developer-beatswitch-14-10-14.html)
+[Come work with us at BeatSwitch!](https://larajobs.com/job/133/beatswitch-is-looking-for-a-senior-php-developer)
 
 ## Table of Contents
 
