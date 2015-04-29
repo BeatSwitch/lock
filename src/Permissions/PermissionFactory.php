@@ -33,8 +33,7 @@ class PermissionFactory
     {
         $type = $permission['type'];
 
-        // Make sure the id is typecast to an integer.
-        $id = ! is_null($permission['resource_id']) ? (int) $permission['resource_id'] : null;
+        $id = ! is_null($permission['resource_id']) ? $permission['resource_id'] : null;
 
         if ($type === Privilege::TYPE) {
             return new Privilege(
@@ -60,8 +59,7 @@ class PermissionFactory
      */
     public static function createFromObject($permission)
     {
-        // Make sure the id is typecast to an integer.
-        $id = ! is_null($permission->resource_id) ? (int) $permission->resource_id : null;
+        $id = ! is_null($permission->resource_id) ? $permission->resource_id : null;
 
         if ($permission->type === Privilege::TYPE) {
             return new Privilege(
