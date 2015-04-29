@@ -9,13 +9,13 @@ final class SimpleResource implements Resource
     private $type;
 
     /**
-     * @var int|null
+     * @var string|null
      */
     private $id;
 
     /**
      * @param string $type
-     * @param int|null $id
+     * @param string|null $id
      */
     public function __construct($type, $id = null)
     {
@@ -36,7 +36,7 @@ final class SimpleResource implements Resource
     /**
      * The main identifier for the resource
      *
-     * @return int|null
+     * @return string|null
      */
     public function getResourceId()
     {
