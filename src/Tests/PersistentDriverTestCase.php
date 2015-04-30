@@ -113,7 +113,7 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
     final function it_succeeds_with_a_valid_action_on_a_resource_object()
     {
         $lock = $this->getCallerLock();
-        $event = new SimpleResource('events', 1);
+        $event = new SimpleResource('events', '1');
 
         $lock->allow('read', $event);
 
@@ -123,7 +123,7 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
     /** @test */
     final function it_fails_with_an_invalid_action_on_a_resource_object()
     {
-        $this->assertFalse($this->getCallerLock()->can('edit', new SimpleResource('events', 1)));
+        $this->assertFalse($this->getCallerLock()->can('edit', new SimpleResource('events', '1')));
     }
 
     /** @test */
@@ -157,7 +157,7 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
     {
         $lock = $this->getCallerLock();
 
-        $lock->allow('update', new SimpleResource('events', 1));
+        $lock->allow('update', new SimpleResource('events', '1'));
 
         // We can't update every event, just the one with an ID of 1.
         $this->assertFalse($lock->can('update', 'events'));
@@ -167,7 +167,7 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
     final function it_succeeds_when_overriding_a_denied_action_on_a_resource()
     {
         $lock = $this->getCallerLock();
-        $stub = new SimpleResource('events', 1);
+        $stub = new SimpleResource('events', '1');
 
         $lock->deny('update');
         $lock->allow('update', $stub);
@@ -180,9 +180,9 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
     {
         $lock = $this->getCallerLock();
 
-        $lock->allow('update', new SimpleResource('events', 1));
+        $lock->allow('update', new SimpleResource('events', '1'));
 
-        $this->assertFalse($lock->can('update', new SimpleResource('events', 2)));
+        $this->assertFalse($lock->can('update', new SimpleResource('events', '2')));
     }
 
     /** @test */
@@ -246,7 +246,7 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse($lock->can('manage'));
         $this->assertTrue($lock->can('manage', 'accounts'));
-        $this->assertTrue($lock->can('manage', 'accounts', 1));
+        $this->assertTrue($lock->can('manage', 'accounts', '1'));
         $this->assertFalse($lock->can('manage', 'events'));
         $this->assertTrue($lock->can('read', 'accounts'));
         $this->assertTrue($lock->can(['read', 'update'], 'accounts'));
@@ -313,33 +313,52 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
     /** @test */
     final function it_can_return_allowed_resource_ids()
     {
-        $this->getCallerLock()->allow('update', 'users', 1);
-        $this->getCallerLock()->allow('update', 'users', 2);
-        $this->getCallerLock()->allow('update', 'events', 4);
-        $this->getCallerLock()->allow(['update', 'delete'], 'users', 3);
-        $this->getCallerLock()->allow(['update', 'delete'], 'users', 5);
-        $this->getCallerLock()->allow('delete', 'users', 2);
-        $this->getCallerLock()->deny('update', 'users', 2);
+        $this->getCallerLock()->allow('update', 'users', '1');
+        $this->getCallerLock()->allow('update', 'users', '2');
+        $this->getCallerLock()->allow('update', 'events', '4');
+        $this->getCallerLock()->allow(['update', 'delete'], 'users', '3');
+        $this->getCallerLock()->allow(['update', 'delete'], 'users', '5');
+        $this->getCallerLock()->allow('delete', 'users', '2');
+        $this->getCallerLock()->deny('update', 'users', '2');
 
-        $this->assertEquals([1, 3, 5], $this->getCallerLock()->allowed('update', 'users'));
-        $this->assertEquals([3, 5, 2], $this->getCallerLock()->allowed('delete', 'users'));
-        $this->assertEquals([3, 5], $this->getCallerLock()->allowed(['update', 'delete'], 'users'));
+        $expected = ['1', '3', '5'];
+        $result = $this->getCallerLock()->allowed('update', 'users');
+        sort($expected, SORT_STRING);
+        sort($result, SORT_STRING);
+        $this->assertEquals($expected,$result);
+
+        $expected = ['3', '5', '2'];
+        $result = $this->getCallerLock()->allowed('delete', 'users');
+        sort($expected, SORT_STRING);
+        sort($result, SORT_STRING);
+        $this->assertEquals($expected,$result);
+
+        $expected = ['3', '5'];
+        $result = $this->getCallerLock()->allowed(['update', 'delete'], 'users');
+        sort($expected, SORT_STRING);
+        sort($result, SORT_STRING);
+        $this->assertEquals($expected,$result);
     }
 
     /** @test */
     final function it_can_return_denied_resource_ids()
     {
-        $this->getCallerLock()->allow('update', 'users', 1);
-        $this->getCallerLock()->allow('update', 'users', 2);
-        $this->getCallerLock()->allow('update', 'events', 4);
-        $this->getCallerLock()->allow(['update', 'delete'], 'users', 3);
-        $this->getCallerLock()->allow(['update', 'delete'], 'users', 5);
-        $this->getCallerLock()->deny('delete', 'users', 1);
-        $this->getCallerLock()->allow('delete', 'users', 2);
-        $this->getCallerLock()->deny('update', 'users', 2);
+        $this->getCallerLock()->allow('update', 'users', '1');
+        $this->getCallerLock()->allow('update', 'users', '2');
+        $this->getCallerLock()->allow('update', 'events', '4');
+        $this->getCallerLock()->allow(['update', 'delete'], 'users', '3');
+        $this->getCallerLock()->allow(['update', 'delete'], 'users', '5');
+        $this->getCallerLock()->deny('delete', 'users', '1');
+        $this->getCallerLock()->allow('delete', 'users', '2');
+        $this->getCallerLock()->deny('update', 'users', '2');
 
-        $this->assertEquals([2], $this->getCallerLock()->denied('update', 'users'));
-        $this->assertEquals([1], $this->getCallerLock()->denied('delete', 'users'));
-        $this->assertEquals([1, 2], $this->getCallerLock()->denied(['update', 'delete'], 'users'));
+        $this->assertEquals(['2'], $this->getCallerLock()->denied('update', 'users'));
+        $this->assertEquals(['1'], $this->getCallerLock()->denied('delete', 'users'));
+
+        $expected = ['1', '2'];
+        $result = $this->getCallerLock()->denied(['update', 'delete'], 'users');
+        sort($expected, SORT_STRING);
+        sort($result, SORT_STRING);
+        $this->assertEquals($expected,$result);
     }
 }
