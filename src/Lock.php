@@ -43,6 +43,34 @@ abstract class Lock
         return true;
     }
 
+    public function canExplicitly($action, $resource = null, $resourceId = null) {
+        $resource = $this->convertResourceToObject($resource, $resourceId);
+        $permissions = $this->getPermissions();
+
+        $hasPrivilege = false;
+
+        foreach ($permissions as $permission) {
+            if($permission instanceof Privilege && $permission->getAction() == $action && $resource->getResourceType() == $permission->getResourceType() && $resource->getResourceId() == $permission->getResourceId()) {
+                $hasPrivilege = true;
+            }
+        }
+        return $hasPrivilege;
+    }
+
+    public function cannotExplicitly($action, $resource = null, $resourceId = null) {
+        $resource = $this->convertResourceToObject($resource, $resourceId);
+        $permissions = $this->getPermissions();
+
+        $hasRestriction = false;
+
+        foreach ($permissions as $permission) {
+            if($permission instanceof Restriction && $permission->getAction() == $action && $resource->getResourceType() == $permission->getResourceType() && $resource->getResourceId() == $permission->getResourceId()) {
+                $hasRestriction = true;
+            }
+        }
+        return $hasRestriction;
+    }
+
     /**
      * Determine if an action isn't allowed
      *
@@ -121,6 +149,29 @@ abstract class Lock
         }
     }
 
+
+    /**
+     * Clear the subject permission/restriction to do something
+     *
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
+     * @param string $resourceId
+     * @param \BeatSwitch\Lock\Permissions\Condition|\BeatSwitch\Lock\Permissions\Condition[]|\Closure $conditions
+     */
+    public function clear($action, $resource = null, $resourceId = null, $conditions = [])
+    {
+        $actions = (array) $action;
+        $resource = $this->convertResourceToObject($resource, $resourceId);
+        $permissions = $this->getPermissions();
+        foreach ($actions as $action) {
+            $privilege = new Privilege($action, $resource);
+            $this->removePermission($privilege);
+            $restriction = new Restriction($action, $resource);
+            $this->removePermission($restriction);
+        }
+    }
+
+
     /**
      * Change the value for a permission
      *
@@ -144,20 +195,92 @@ abstract class Lock
      * @param string|\BeatSwitch\Lock\Resources\Resource $resourceType
      * @return array
      */
-    public function allowed($action, $resourceType)
+    public function allowed($actions, $resourceType)
     {
+       
+        // rules :
+        // (1) a permission on caller level is always winner against a permission on role level
+        // (2) a privilege is winner against a restriction between two different roles inherited by a caller
+        // (1) > (2)
+        
+        // example : 
+        // Peter inherits Editor role & Publisher role (R2 = Resource Id 2)
+        // Peter is allowed to R2 and Editor is denied to R2 => Peter can R2
+        // Peter is denied to R2 and Editor is allowed to R2 => Peter cannot R2
+        // Peter has not explicit permission on R2, but Editor is allowed to R2 and Publisher is denied to R2 => Peter can R2
+
+        /* !!! only works with one level of heritence of role on caller */
+
+        // if actions is more than one action, it will return resource id with Privilege for ALL action
+
         $resourceType = $resourceType instanceof Resource ? $resourceType->getResourceType() : $resourceType;
+        $actions = (array) $actions;
+        $allowed = [];
+        $allowedOnCallerLevel = [];
+        $deniedOnCallerLevel = [];
+        $allowedOnRoleLevel = [];
 
-        // Get all the ids from privileges which match the given resource type.
-        $ids = array_unique(array_map(function (Permission $permission) {
-            return $permission->getResourceId();
-        }, array_filter($this->getPermissions(), function (Permission $permission) use ($resourceType) {
-            return $permission instanceof Privilege && $permission->getResourceType() === $resourceType;
-        })));
+        foreach($actions as $action) {
+            
+            $allowed[$action] = [];
+            $allowedOnCallerLevel[$action] = [];
+            $deniedOnCallerLevel[$action] = [];
+            $allowedOnRoleLevel[$action] = [];
 
-        return array_values(array_filter($ids, function ($id) use ($action, $resourceType) {
-            return $this->can($action, $resourceType, $id);
-        }));
+            // browse permission of a role / caller
+            foreach($this->getPermissions() as $permission){
+                if($permission->getResourceType() != $resourceType || $permission->getAction() != $action) {
+                    continue;
+                }
+
+                if($permission instanceof Restriction) {
+                    if(!in_array($permission->getResourceId(), $deniedOnCallerLevel[$action])) {
+                        $deniedOnCallerLevel[$action][] = $permission->getResourceId();
+                    }
+                } elseif($permission instanceof Privilege) {
+                    if(!in_array($permission->getResourceId(), $allowedOnCallerLevel[$action])) {
+                        $allowedOnCallerLevel[$action][] = $permission->getResourceId();
+                    }
+                } else {
+                    throw new \Exception("Unrecognize permission", 1);   
+                }
+            }
+
+            // browse the permission of roles inherited by the caller
+            if(method_exists($this, 'getLockInstancesForCallerRoles')) {
+                foreach ($this->getLockInstancesForCallerRoles() as $role) {
+                    foreach ($role->getPermissions() as $permission) {
+                        if($permission->getResourceType() != $resourceType || $permission->getAction() != $action) {
+                            continue;
+                        }
+
+                        if($permission instanceof Privilege) {
+                            if(!in_array($permission->getResourceId(), $allowedOnRoleLevel[$action])) {
+                                $allowedOnRoleLevel[$action][] = $permission->getResourceId();
+                            }
+                        } 
+                    }
+                }
+                
+                // we keep only the Privilege on role that are not a Restriction by the children(caller level)
+                $allowedOnRoleLevel[$action] = array_diff($allowedOnRoleLevel[$action], $deniedOnCallerLevel[$action]);
+            }
+
+            // we combine Privilege on role level with Privilege on caller level
+            $allowed[$action] = array_unique(array_merge($allowedOnRoleLevel[$action], $allowedOnCallerLevel[$action]));
+        }
+
+        if(empty($actions)) {
+            // no action => nothing to return
+            return [];
+        } elseif(count($actions) == 1) {
+            // only one action = we return the allowed ressource id
+            return $allowed[$actions[0]];
+        } else {
+            // we return ressource id present in all actions
+            $intersect = call_user_func_array('array_intersect', $allowed);
+            return array_values($intersect);
+        }
     }
 
     /**
@@ -167,20 +290,90 @@ abstract class Lock
      * @param string|\BeatSwitch\Lock\Resources\Resource $resourceType
      * @return array
      */
-    public function denied($action, $resourceType)
+    public function denied($actions, $resourceType)
     {
+
+        // if actions is more than one action, it will return resource id with Privilege for AT LEAST ONE action
+
         $resourceType = $resourceType instanceof Resource ? $resourceType->getResourceType() : $resourceType;
+        $actions = (array) $actions;
+        $denied = [];
+        $allowedOnCallerLevel = [];
+        $deniedOnCallerLevel = [];
+        $allowedOnRoleLevel = [];
+        $deniedOnRoleLevel = [];
 
-        // Get all the ids from restrictions which match the given resource type.
-        $ids = array_unique(array_map(function (Permission $permission) {
-            return $permission->getResourceId();
-        }, array_filter($this->getPermissions(), function (Permission $permission) use ($resourceType) {
-            return $permission instanceof Restriction && $permission->getResourceType() === $resourceType;
-        })));
+        foreach($actions as $action) {
+            $denied[$action] = [];
+            $allowedOnCallerLevel[$action] = [];
+            $deniedOnCallerLevel[$action] = [];
+            $deniedOnRoleLevel[$action] = [];
 
-        return array_values(array_filter($ids, function ($id) use ($action, $resourceType) {
-            return $this->cannot($action, $resourceType, $id);
-        }));
+            // browse permission of a role / caller
+            foreach($this->getPermissions() as $permission){
+                if($permission->getResourceType() != $resourceType || $permission->getAction() != $action) {
+                    continue;
+                }
+
+                if($permission instanceof Restriction) {
+                    if(!in_array($permission->getResourceId(), $deniedOnCallerLevel[$action])) {
+                        $deniedOnCallerLevel[$action][] = $permission->getResourceId();
+                    }
+                } elseif($permission instanceof Privilege) {
+                    if(!in_array($permission->getResourceId(), $allowedOnCallerLevel[$action])) {
+                        $allowedOnCallerLevel[$action][] = $permission->getResourceId();
+                    }
+                } else {
+                    throw new \Exception("Unrecognize permission", 1);   
+                }
+            }
+
+            // browse the permission of roles inherited by the caller
+            if(method_exists($this, 'getLockInstancesForCallerRoles')) {
+                foreach ($this->getLockInstancesForCallerRoles() as $role) {
+                    foreach ($role->getPermissions() as $permission) {
+                        if($permission->getResourceType() != $resourceType || $permission->getAction() != $action) {
+                            continue;
+                        }
+
+                        if($permission instanceof Privilege) {
+                            if(!in_array($permission->getResourceId(), $allowedOnRoleLevel[$action])) {
+                                $allowedOnRoleLevel[$action][] = $permission->getResourceId(); 
+                            }
+
+                            // remove any Restriction set on another role (Rule 2)
+                            if(in_array($permission->getResourceId(), $deniedOnRoleLevel[$action])) {
+                                $deniedOnRoleLevel[$action] = array_diff($deniedOnRoleLevel[$action],[$permission->getResourceId()]);
+                            }
+                        }
+
+                        if($permission instanceof Restriction) {
+                            if(!in_array($permission->getResourceId(), $deniedOnRoleLevel[$action]) && !in_array($permission->getResourceId(), $allowedOnRoleLevel[$action])) {
+                                $deniedOnRoleLevel[$action][] = $permission->getResourceId();
+                            }
+                        } 
+                    }
+                }
+
+                // we keep only the Restriction on role that are not a Allowed by the children(caller level)
+                $deniedOnRoleLevel[$action] = array_diff($deniedOnRoleLevel[$action], $allowedOnCallerLevel[$action]);
+            }
+
+            // we combine Restriction on role level with Restriction on caller level
+            $denied[$action] = array_unique(array_merge($deniedOnRoleLevel[$action], $deniedOnCallerLevel[$action]));
+        }
+
+        if(empty($actions)) {
+            // no action => nothing to return
+            return [];
+        } elseif(count($actions) == 1) {
+            // only one action = we return the denied ressource id
+            return $denied[$actions[0]];
+        } else {
+            // we return ressource id present in actions (not specially in all actions)
+            $intersect = call_user_func_array('array_merge', $denied);
+            return array_values($intersect);
+        }
     }
 
     /**
