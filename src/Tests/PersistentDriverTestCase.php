@@ -312,7 +312,6 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
 
     /**
     * @test
-    * @group failing
     */
     final function it_can_return_allowed_resource_ids()
     {
@@ -1241,5 +1240,41 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->getRoleLock('editor')->canExplicitly('fake', 'love', '2'));
         $this->assertFalse($this->getRoleLock('editor')->cannotExplicitly('fake', 'love', '2'));
 
+    }
+
+    /**
+    * @test
+    */
+    final function it_can_deny_permission_without_removing_other_privileges(){
+        $this->getRoleLock('editor')->allow('fake', 'project');
+        $this->assertTrue($this->getRoleLock('editor')->can('fake', 'project'));
+        $this->assertTrue($this->getRoleLock('editor')->can('fake', 'project', '1'));
+        $this->assertTrue($this->getRoleLock('editor')->can('fake', 'project', '2'));
+        $this->getRoleLock('editor')->allow('fake', 'project', '1');
+        $this->assertTrue($this->getRoleLock('editor')->can('fake', 'project'));
+        $this->assertTrue($this->getRoleLock('editor')->can('fake', 'project', '1'));
+        $this->assertTrue($this->getRoleLock('editor')->can('fake', 'project', '2'));
+        $this->getRoleLock('editor')->deny('fake', 'project', '1');
+        $this->assertTrue($this->getRoleLock('editor')->can('fake', 'project'));
+        $this->assertTrue($this->getRoleLock('editor')->cannot('fake', 'project', '1'));
+        $this->assertTrue($this->getRoleLock('editor')->can('fake', 'project', '2'));
+    }
+
+    /**
+    * @test
+    */
+    final function it_can_allow_permission_without_removing_other_restrictions(){
+        $this->getRoleLock('editor')->deny('fake', 'project');
+        $this->assertTrue($this->getRoleLock('editor')->cannot('fake', 'project'));
+        $this->assertTrue($this->getRoleLock('editor')->cannot('fake', 'project', '1'));
+        $this->assertTrue($this->getRoleLock('editor')->cannot('fake', 'project', '2'));
+        $this->getRoleLock('editor')->deny('fake', 'project', '1');
+        $this->assertTrue($this->getRoleLock('editor')->cannot('fake', 'project'));
+        $this->assertTrue($this->getRoleLock('editor')->cannot('fake', 'project', '1'));
+        $this->assertTrue($this->getRoleLock('editor')->cannot('fake', 'project', '2'));
+        $this->getRoleLock('editor')->allow('fake', 'project', '1');
+        $this->assertTrue($this->getRoleLock('editor')->cannot('fake', 'project'));
+        $this->assertTrue($this->getRoleLock('editor')->can('fake', 'project', '1'));
+        $this->assertTrue($this->getRoleLock('editor')->cannot('fake', 'project', '2'));
     }
 }

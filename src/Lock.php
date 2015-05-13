@@ -133,7 +133,7 @@ abstract class Lock
 
         foreach ($actions as $action) {
             foreach ($permissions as $key => $permission) {
-                if ($permission instanceof Privilege && $permission->isAllowed($this, $action, $resource)) {
+                if ($permission instanceof Privilege && $permission->isAllowed($this, $action, $resource) && $permission->getResourceId() == $resource->getResourceId() && $permission->getResourceType() == $resource->getResourceType()) {
                     $this->removePermission($permission);
                     unset($permissions[$key]);
                 }
@@ -162,7 +162,6 @@ abstract class Lock
     {
         $actions = (array) $action;
         $resource = $this->convertResourceToObject($resource, $resourceId);
-        $permissions = $this->getPermissions();
         foreach ($actions as $action) {
             $privilege = new Privilege($action, $resource);
             $this->removePermission($privilege);
