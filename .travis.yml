@@ -17,5 +17,5 @@ script:
   - vendor/bin/phpunit --verbose
 
 matrix:
-  allowed_failures:
+  allow_failures:
     - php: 7.0
