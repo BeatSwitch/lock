@@ -693,6 +693,7 @@ use BeatSwitch\Lock\Callers\Caller;
 use BeatSwitch\Lock\Drivers\Driver;
 use BeatSwitch\Lock\Permissions\Permission;
 use BeatSwitch\Lock\Permissions\PermissionFactory;
+use BeatSwitch\Lock\Roles\Role;
 use CallerPermission;
 use RolePermission;
 
