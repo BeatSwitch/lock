@@ -285,7 +285,7 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
         $lock = $this->getCallerLock();
         $lock->allow('create', 'posts');
 
-        $this->getRoleLock('user')->deny('user', 'create', 'posts');
+        $this->getRoleLock('user')->deny('create', 'posts');
 
         $this->assertTrue($lock->can('create', 'posts'));
     }
