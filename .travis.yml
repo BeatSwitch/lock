@@ -14,8 +14,15 @@ install:
 
 script:
   - vendor/bin/phpspec run --verbose --format=dot
-  - vendor/bin/phpunit --verbose
+  - vendor/bin/phpunit --verbose --coverage-clover build/logs/clover.xml
+
+after_script:
+  - vendor/bin/test-reporter
 
 matrix:
   allow_failures:
     - php: 7.0
+
+addons:
+  code_climate:
+    repo_token: $CODE_CLIMATE_TOKEN
