@@ -118,6 +118,20 @@ trait LockAware
     }
 
     /**
+     * Clear a given permission on a subject
+     *
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
+     * @param int $resourceId
+     */
+    public function clear($action, $resource = null, $resourceId = null)
+    {
+        $this->assertLockInstanceIsSet();
+
+        $this->lock->clear($action, $resource, $resourceId);
+    }
+
+    /**
      * Sets the lock instance for this caller
      *
      * @param \BeatSwitch\Lock\Lock $lock

@@ -47,6 +47,22 @@ class RoleLockSpec extends ObjectBehavior
         $this->can('edit')->shouldReturn(false);
     }
 
+    function it_can_clear_privileges()
+    {
+        $this->allow('edit');
+        $this->clear('edit');
+
+        $this->can('edit')->shouldReturn(false);
+    }
+
+    function it_can_clear_restrictions()
+    {
+        $this->deny('edit');
+        $this->clear('edit');
+
+        $this->can('edit')->shouldReturn(false);
+    }
+
     function it_can_handle_a_wildcard()
     {
         $this->allow('all');

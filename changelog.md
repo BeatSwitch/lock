@@ -4,6 +4,10 @@ All notable changes to Lock will be documented in this file. This file follows t
 
 ## 0.1.1 - Unreleased
 
+### Added
+
+- Added the ability to clear a given permission without adding a restriction for it
+
 ### Changed
 
 - Switched from Scrutinizer to Code Climate for analysis

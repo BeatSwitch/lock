@@ -88,6 +88,17 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
     }
 
     /** @test */
+    final function it_fails_with_a_cleared_action()
+    {
+        $lock = $this->getCallerLock();
+
+        $lock->allow('update');
+        $lock->clear('update');
+
+        $this->assertFalse($lock->can('update'));
+    }
+
+    /** @test */
     final function it_succeeds_with_an_inverse_check()
     {
         $this->assertTrue($this->getCallerLock()->cannot('update'));
@@ -133,6 +144,17 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
 
         $lock->allow('export', 'events');
         $lock->deny('export', 'events');
+
+        $this->assertFalse($lock->can('export', 'events'));
+    }
+
+    /** @test */
+    final function it_fails_with_a_cleared_action_on_a_resource_type()
+    {
+        $lock = $this->getCallerLock();
+
+        $lock->allow('export', 'events');
+        $lock->clear('export', 'events');
 
         $this->assertFalse($lock->can('export', 'events'));
     }
