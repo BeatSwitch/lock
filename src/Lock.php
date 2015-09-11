@@ -104,18 +104,7 @@ abstract class Lock
         $permissions = $this->getPermissions();
 
         foreach ($actions as $action) {
-            foreach ($permissions as $key => $permission) {
-                if ($permission instanceof Privilege && $permission->isAllowed($this, $action, $resource)) {
-                    $this->removePermission($permission);
-                    unset($permissions[$key]);
-                }
-            }
-
-            $privilege = new Privilege($action, $resource);
-
-            if ($this->hasPermission($privilege)) {
-                $this->removePermission($privilege);
-            }
+            $this->clearPermission($action, $resource, $permissions);
 
             $this->storePermission(new Restriction($action, $resource, $conditions));
         }
@@ -181,6 +170,45 @@ abstract class Lock
         return array_values(array_filter($ids, function ($id) use ($action, $resourceType) {
             return $this->cannot($action, $resourceType, $id);
         }));
+    }
+
+    /**
+     * Clear a given permission on a subject
+     *
+     * @param string|array $action
+     * @param string|\BeatSwitch\Lock\Resources\Resource $resource
+     * @param int $resourceId
+     */
+    public function clear($action, $resource = null, $resourceId = null)
+    {
+        $actions = (array) $action;
+        $resource = $this->convertResourceToObject($resource, $resourceId);
+        $permissions = $this->getPermissions();
+
+        foreach ($actions as $action) {
+            $this->clearPermission($action, $resource, $permissions);
+        }
+    }
+
+    /**
+     * @param string $action
+     * @param \BeatSwitch\Lock\Resources\Resource $resource
+     * @param \BeatSwitch\Lock\Permissions\Permission[] $permissions
+     */
+    private function clearPermission($action, Resource $resource, array $permissions)
+    {
+        foreach ($permissions as $key => $permission) {
+            if ($permission instanceof Privilege && $permission->isAllowed($this, $action, $resource)) {
+                $this->removePermission($permission);
+                unset($permissions[$key]);
+            }
+        }
+
+        $privilege = new Privilege($action, $resource);
+
+        if ($this->hasPermission($privilege)) {
+            $this->removePermission($privilege);
+        }
     }
 
     /**

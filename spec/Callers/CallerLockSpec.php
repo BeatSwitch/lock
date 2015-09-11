@@ -47,6 +47,62 @@ class CallerLockSpec extends ObjectBehavior
         $this->can('edit')->shouldReturn(false);
     }
 
+    function it_can_clear_privileges()
+    {
+        $this->allow('edit');
+        $this->clear('edit');
+
+        $this->can('edit')->shouldReturn(false);
+    }
+
+    function it_can_clear_multiple_privileges_at_once()
+    {
+        $this->allow(['create', 'edit', 'delete']);
+        $this->clear(['create', 'edit', 'delete']);
+
+        $this->can('create')->shouldReturn(false);
+        $this->can('edit')->shouldReturn(false);
+        $this->can('delete')->shouldReturn(false);
+    }
+
+    function it_only_clears_the_requested_privileges()
+    {
+        $this->allow(['create', 'edit', 'delete']);
+        $this->clear(['edit', 'delete']);
+
+        $this->can('create')->shouldReturn(true);
+        $this->can('edit')->shouldReturn(false);
+        $this->can('delete')->shouldReturn(false);
+    }
+
+    function it_only_clears_the_privileges_on_the_requested_resource()
+    {
+        $this->allow('create', 'users');
+        $this->allow('create', 'accounts');
+        $this->clear('create', 'users');
+
+        $this->can('create', 'users')->shouldReturn(false);
+        $this->can('create', 'accounts')->shouldReturn(true);
+    }
+
+    function it_can_clear_restrictions()
+    {
+        $this->deny('edit');
+        $this->clear('edit');
+
+        $this->can('edit')->shouldReturn(false);
+    }
+
+    function it_can_clear_multiple_restrictions_at_once()
+    {
+        $this->deny(['create', 'edit', 'delete']);
+        $this->clear(['create', 'edit', 'delete']);
+
+        $this->can('create')->shouldReturn(false);
+        $this->can('edit')->shouldReturn(false);
+        $this->can('delete')->shouldReturn(false);
+    }
+
     function it_can_handle_a_wildcard()
     {
         $this->allow('all');
