@@ -175,6 +175,19 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
     }
 
     /** @test */
+    final function it_always_fails_when_permissions_have_been_cleared_with_the_all_action()
+    {
+        $lock = $this->getCallerLock();
+
+        $lock->allow('all', 'posts');
+        $lock->clear('all', 'posts');
+
+        $this->assertFalse($lock->can('create', 'posts'));
+        $this->assertFalse($lock->can('update', 'posts'));
+        $this->assertFalse($lock->can('delete', 'posts'));
+    }
+
+    /** @test */
     function it_fails_with_a_denied_action_for_a_resource_type()
     {
         $lock = $this->getCallerLock();
@@ -219,6 +232,43 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
     }
 
     /** @test */
+    final function it_can_clear_multiple_permissions_at_once()
+    {
+        $lock = $this->getCallerLock();
+
+        $lock->allow(['create', 'update', 'delete'], 'comments');
+        $lock->clear(['create', 'delete'], 'comments');
+
+        $this->assertTrue($lock->can('update', 'comments'));
+        $this->assertTrue($lock->cannot(['create', 'delete'], 'comments'));
+    }
+
+    /** @test */
+    final function it_only_clears_the_requested_permissions()
+    {
+        $lock = $this->getCallerLock();
+
+        $lock->allow(['create', 'update', 'delete']);
+        $lock->clear(['update', 'delete']);
+
+        $this->assertTrue($lock->cannot(['update', 'delete']));
+        $this->assertTrue($lock->can('create'));
+    }
+
+    /** @test */
+    final function it_only_clears_permissions_on_the_given_resource()
+    {
+        $lock = $this->getCallerLock();
+
+        $lock->allow(['create', 'update', 'delete'], 'comments');
+        $lock->allow(['create', 'update', 'delete'], 'posts');
+        $lock->clear(['create', 'update', 'delete'], 'comments');
+
+        $this->assertFalse($lock->can(['create', 'update', 'delete'], 'comments'));
+        $this->assertTrue($lock->can(['create', 'update', 'delete'], 'posts'));
+    }
+
+    /** @test */
     final function it_can_toggle_permissions()
     {
         $lock = $this->getCallerLock();
@@ -256,6 +306,9 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
 
         $this->caller->toggle('update');
         $this->assertTrue($this->caller->can('update'));
+
+        $this->caller->clear('update');
+        $this->assertFalse($this->caller->can('update'));
     }
 
     /** @test */
@@ -279,6 +332,24 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
         $this->assertTrue($lock->can('manage', 'accounts'));
         $this->assertFalse($lock->can('create', 'accounts'));
         $this->assertTrue($lock->can(['read', 'update', 'delete'], 'accounts'));
+    }
+
+    /** @test */
+    final function it_can_clear_permissions_using_action_aliases()
+    {
+        $this->manager->alias('manage', ['read', 'write']);
+
+        $lock = $this->getCallerLock();
+        $lock->allow('manage', 'accounts');
+
+        $this->assertTrue($lock->can('manage', 'accounts'));
+        $this->assertTrue($lock->can('read', 'accounts'));
+        $this->assertTrue($lock->can('write', 'accounts'));
+
+        $lock->clear('manage', 'accounts');
+        $this->assertTrue($lock->cannot('manage', 'accounts'));
+        $this->assertTrue($lock->cannot('read', 'accounts'));
+        $this->assertTrue($lock->cannot('write', 'accounts'));
     }
 
     /** @test */
