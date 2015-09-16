@@ -269,6 +269,41 @@ abstract class PersistentDriverTestCase extends \PHPUnit_Framework_TestCase
     }
 
     /** @test */
+    final function it_can_clear_every_single_permission_for_a_lock_instance()
+    {
+        $callerLock = $this->getCallerLock();
+        $roleLock = $this->getRoleLock('admin');
+
+        $callerLock->allow('manage-users');
+        $callerLock->allow(['create', 'update', 'delete'], 'posts');
+        $roleLock->allow('manage-users');
+        $callerLock->clear();
+
+        $this->assertFalse($callerLock->can('manage-users'));
+        $this->assertFalse($callerLock->can('update', 'posts'));
+        $this->assertFalse($callerLock->can('update', 'posts'));
+
+        // Other callers stay unaffected.
+        $this->assertTrue($roleLock->can('manage-users'));
+    }
+
+    /** @todo */
+    final function it_can_clear_all_permissions_for_a_given_resource()
+    {
+        $lock = $this->getCallerLock();
+
+        $lock->allow('manage-users');
+        $lock->allow(['create', 'update', 'delete'], 'posts');
+        $lock->allow(['create', 'update', 'delete'], 'comments');
+        $lock->clear(null, 'posts');
+
+        $this->assertTrue($lock->can('manage-users'));
+        $this->assertTrue($lock->can('update', 'comments'));
+        $this->assertFalse($lock->can('update', 'posts'));
+        $this->assertFalse($lock->can('create', 'posts'));
+    }
+
+    /** @test */
     final function it_can_toggle_permissions()
     {
         $lock = $this->getCallerLock();

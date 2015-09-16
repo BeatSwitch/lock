@@ -179,14 +179,25 @@ abstract class Lock
      * @param string|\BeatSwitch\Lock\Resources\Resource $resource
      * @param int $resourceId
      */
-    public function clear($action, $resource = null, $resourceId = null)
+    public function clear($action = null, $resource = null, $resourceId = null)
     {
         $actions = (array) $action;
-        $resource = $this->convertResourceToObject($resource, $resourceId);
+        $resourceObject = $this->convertResourceToObject($resource, $resourceId);
         $permissions = $this->getPermissions();
 
-        foreach ($actions as $action) {
-            $this->clearPermission($action, $resource, $permissions);
+        if ($action === null && $resource === null) {
+            // Clear every permission for this lock instance.
+            foreach ($permissions as $permission) {
+                $this->removePermission($permission);
+            }
+        } elseif ($action === null && $resource !== null) {
+            // Clear all permissions for a given resource.
+            /** @todo Needs to be implemented */
+        } else {
+            // Clear every permission for the given actions.
+            foreach ($actions as $action) {
+                $this->clearPermission($action, $resourceObject, $permissions);
+            }
         }
     }
 

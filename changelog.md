@@ -2,11 +2,11 @@
 
 All notable changes to Lock will be documented in this file. This file follows the *[Keep a CHANGELOG](http://keepachangelog.com/)* standards.
 
-## 0.1.1 - Unreleased
+## 0.2.0 - 2015-09-16
 
 ### Added
 
-- Added the ability to clear a given permission without adding a restriction for it
+- Added the ability to clear permissions
 
 ### Changed
 

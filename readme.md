@@ -28,6 +28,7 @@ Created by [Dries Vints](https://twitter.com/driesvints). Made possible thanks t
     - [Working with a static driver](#working-with-a-static-driver)
     - [Working with a persistent driver](#working-with-a-persistent-driver)
     - [Setting and checking permissions](#setting-and-checking-permissions)
+    - [Clearing permissions](#clearing-permissions)
     - [Setting an action alias](#setting-an-action-alias)
     - [Setting a God caller](#setting-a-god-caller)
     - [Working with roles](#working-with-roles)
@@ -276,6 +277,31 @@ $lock->allow(['create', 'edit'], 'posts');
 $lock->can('create', 'posts'); // true
 $lock->can(['create', 'edit'], 'posts'); // true
 $lock->can(['create', 'delete'], 'posts'); // false
+```
+
+### Clearing permissions
+
+You can easily clear permissions for a set specific combination of actions and resources.
+
+```php
+$lock->allow(['create', 'edit'], 'posts');
+
+$lock->clear('edit', 'posts');
+
+$lock->can('edit', 'posts'); // false
+$lock->can('create', 'posts'); // true
+```
+
+You can also just clear all permissions for a lock instance.
+
+```php
+$lock->allow('manage-posts');
+$lock->allow(['create', 'edit'], 'users');
+
+$lock->clear();
+
+$lock->can('manage-posts'); // false
+$lock->can('create', 'users'); // false
 ```
 
 ### Setting an action alias
