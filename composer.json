@@ -38,5 +38,10 @@
             "stubs\\BeatSwitch\\Lock\\": "stubs/",
             "tests\\BeatSwitch\\Lock\\": "tests/"
         }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.3-dev"
+        }
     }
 }
