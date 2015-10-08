@@ -223,6 +223,16 @@ abstract class Lock
     }
 
     /**
+     * Fetch collection of all caller permissions
+     *
+     * @return Permissions\Permission[]
+     */
+    public function all()
+    {
+        return $this->getPermissions();
+    }
+
+    /**
      * Determine if an action is allowed
      *
      * @param string $action

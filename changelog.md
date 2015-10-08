@@ -2,6 +2,9 @@
 
 All notable changes to Lock will be documented in this file. This file follows the *[Keep a CHANGELOG](http://keepachangelog.com/)* standards.
 
+## [Unreleased]
+- Added all method, this feature returns the permissions collection for a caller.
+
 ## 0.2.0 - 2015-09-16
 
 ### Added

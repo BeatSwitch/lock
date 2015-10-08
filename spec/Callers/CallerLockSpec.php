@@ -133,4 +133,13 @@ class CallerLockSpec extends ObjectBehavior
         $this->can('create', 'posts')->shouldReturn(true);
         $this->can('create', 'pages')->shouldReturn(false);
     }
+
+    function it_can_fetch_all_permissions()
+    {
+        $this->allow('login');
+        $this->allow('create', 'posts');
+        $this->deny('delete', 'users');
+
+        $this->all()->shouldBeArray();
+    }
 }
