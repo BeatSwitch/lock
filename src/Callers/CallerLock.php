@@ -56,7 +56,7 @@ class CallerLock extends Lock
      *
      * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
-    protected function getPermissions()
+    public function getPermissions()
     {
         return $this->getDriver()->getCallerPermissions($this->caller);
     }
