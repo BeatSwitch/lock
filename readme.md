@@ -9,6 +9,10 @@
 
 <img width="100%" src="https://s3.eu-central-1.amazonaws.com/assets.beatswitch.com/lock_banner.png">
 
+> I'm sad to say that Lock is currently not maintained. I won't be able to offer support or accept new contributions for the current time being. Other priorities are keeping me from putting the work into Lock that it deserves. Eventually I'll try to pick up work again but unfortunately I cannot say when. My thanks goes out to all the contributors and users.
+>
+> -- Dries
+
 Lock is a flexible, driver based **Acl** package for **PHP 5.4+**.
 
 Created by [Dries Vints](https://twitter.com/driesvints). Made possible thanks to [BeatSwitch](https://beatswitch.com). Inspired by [Authority](https://github.com/machuga/authority) by [Matthew Machuga](https://twitter.com/machuga). Logo by [Jerry Low](http://www.jerrylow.com).
@@ -890,6 +894,8 @@ class EloquentDriverTest extends PersistentDriverTestCase
 And this is all you need! The `PersistentDriverTestCase` contains all the tests you'll need to make sure your driver works as expected. So if all those tests pass then your driver was set up correctly. No need to mock anything, this is a pure integration test case. Of course in this specific example above, for Eloquent to work you'll need to bootstrap Laravel. Working with a database like sqlite would be the best way here to test your driver. 
 
 ## Maintainer
+
+> Lock is unmaintained at this moment.
 
 This package is currently maintained by [Dries Vints](https://github.com/driesvints).  
 If you have any questions please don't hesitate to [ask them in an issue](https://github.com/BeatSwitch/lock/issues/new).
