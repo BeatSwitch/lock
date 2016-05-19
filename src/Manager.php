@@ -147,8 +147,11 @@ class Manager
     */
     public function clearPermissionsForResources($resources)
     {
-        if(is_array($resources))
-            $this->driver->clearPermissionsForResources($resources);
+        if(is_array($resources)) {
+            foreach($resources as $resource) {
+                $this->driver->clearPermissionsForResource($resource);
+            }
+        }
     }
 
     /**

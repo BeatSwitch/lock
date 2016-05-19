@@ -84,11 +84,11 @@ interface Driver
     public function hasRolePermission(Role $role, Permission $permission);
 
     /**
-    * Removes all permissions for several resources, used
+    * Removes all permissions for a resource, used
     * for performance-critical massive removals.
     *
-    * @param array $resources an array of Resource objects
+    * @param \BeatSwitch\Lock\Resources\Resource
     * @return void
     */
-    public function clearPermissionsForResources(array $resources);
+    public function clearPermissionsForResource(Resource $resource);
 }
