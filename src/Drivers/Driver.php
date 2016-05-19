@@ -82,4 +82,13 @@ interface Driver
      * @return bool
      */
     public function hasRolePermission(Role $role, Permission $permission);
+
+    /**
+    * Removes all permissions for several resources, used
+    * for performance-critical massive removals.
+    *
+    * @param array $resources an array of Resource objects
+    * @return void
+    */
+    public function clearPermissionsForResources(array $resources);
 }
