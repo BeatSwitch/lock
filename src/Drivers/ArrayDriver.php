@@ -146,6 +146,18 @@ class ArrayDriver implements Driver
     }
 
     /**
+    * Removes all permissions for a resource, used
+    * for performance-critical massive removals.
+    *
+    * @param \BeatSwitch\Lock\Resources\Resource
+    * @return void
+    */
+    public function clearPermissionsForResource(Resource $resource)
+    {
+        throw new \Exception('Unimplemented method "ArrayDriver::clearPermissionsForResource"');
+    }
+
+    /**
      * Creates a key to store the caller's permissions
      *
      * @param \BeatSwitch\Lock\Callers\Caller $caller

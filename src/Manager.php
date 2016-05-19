@@ -139,6 +139,20 @@ class Manager
     }
 
     /**
+    * Clear permissions for several resources (used
+    * for performance-critical massive removals).
+    *
+    * @param array $resources an array of Resource objects
+    * @return void
+    */
+    public function clearPermissionsForResources(array $resources)
+    {
+        foreach($resources as $resource) {
+            $this->driver->clearPermissionsForResource($resource);
+        }
+    }
+
+    /**
      * @return \BeatSwitch\Lock\Drivers\Driver
      */
     public function getDriver()

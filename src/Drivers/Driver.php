@@ -4,6 +4,7 @@ namespace BeatSwitch\Lock\Drivers;
 use BeatSwitch\Lock\Callers\Caller;
 use BeatSwitch\Lock\Permissions\Permission;
 use BeatSwitch\Lock\Roles\Role;
+use BeatSwitch\Lock\Resources\Resource;
 
 /**
  * A contract to identify an implementation to store permissions to
@@ -82,4 +83,13 @@ interface Driver
      * @return bool
      */
     public function hasRolePermission(Role $role, Permission $permission);
+
+    /**
+    * Removes all permissions for a resource, used
+    * for performance-critical massive removals.
+    *
+    * @param \BeatSwitch\Lock\Resources\Resource
+    * @return void
+    */
+    public function clearPermissionsForResource(Resource $resource);
 }
