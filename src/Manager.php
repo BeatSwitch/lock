@@ -145,12 +145,10 @@ class Manager
     * @param array $resources an array of Resource objects
     * @return void
     */
-    public function clearPermissionsForResources($resources)
+    public function clearPermissionsForResources(array $resources)
     {
-        if(is_array($resources)) {
-            foreach($resources as $resource) {
-                $this->driver->clearPermissionsForResource($resource);
-            }
+        foreach($resources as $resource) {
+            $this->driver->clearPermissionsForResource($resource);
         }
     }
 

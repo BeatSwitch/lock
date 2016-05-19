@@ -154,7 +154,7 @@ class ArrayDriver implements Driver
     */
     public function clearPermissionsForResource(Resource $resource)
     {
-        throw new Exception('Unimplemented method "ArrayDriver::clearPermissionsForResource"');
+        throw new \Exception('Unimplemented method "ArrayDriver::clearPermissionsForResource"');
     }
 
     /**
