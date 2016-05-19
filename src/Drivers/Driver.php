@@ -4,6 +4,7 @@ namespace BeatSwitch\Lock\Drivers;
 use BeatSwitch\Lock\Callers\Caller;
 use BeatSwitch\Lock\Permissions\Permission;
 use BeatSwitch\Lock\Roles\Role;
+use BeatSwitch\Lock\Resources\Resource;
 
 /**
  * A contract to identify an implementation to store permissions to
