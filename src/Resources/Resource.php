@@ -16,7 +16,7 @@ interface Resource
     /**
      * The main identifier for the resource
      *
-     * @return int|null
+     * @return string|null
      */
     public function getResourceId();
 }

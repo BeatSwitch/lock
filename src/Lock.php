@@ -19,7 +19,7 @@ abstract class Lock
      *
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Resources\Resource $resource
-     * @param int $resourceId
+     * @param string $resourceId
      * @return bool
      */
     public function can($action, $resource = null, $resourceId = null)
@@ -48,7 +48,7 @@ abstract class Lock
      *
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Resources\Resource $resource
-     * @param int $resourceId
+     * @param string $resourceId
      * @return bool
      */
     public function cannot($action, $resource = null, $resourceId = null)
@@ -61,7 +61,7 @@ abstract class Lock
      *
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Resources\Resource $resource
-     * @param int $resourceId
+     * @param string $resourceId
      * @param \BeatSwitch\Lock\Permissions\Condition|\BeatSwitch\Lock\Permissions\Condition[]|\Closure $conditions
      */
     public function allow($action, $resource = null, $resourceId = null, $conditions = [])
@@ -94,7 +94,7 @@ abstract class Lock
      *
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Resources\Resource $resource
-     * @param int $resourceId
+     * @param string $resourceId
      * @param \BeatSwitch\Lock\Permissions\Condition|\BeatSwitch\Lock\Permissions\Condition[]|\Closure $conditions
      */
     public function deny($action, $resource = null, $resourceId = null, $conditions = [])
@@ -115,7 +115,7 @@ abstract class Lock
      *
      * @param string|array $action
      * @param string|\BeatSwitch\Lock\Resources\Resource $resource
-     * @param int $resourceId
+     * @param string $resourceId
      */
     public function toggle($action, $resource = null, $resourceId = null)
     {
@@ -324,7 +324,7 @@ abstract class Lock
      * Create a resource value object if a non resource object is passed
      *
      * @param string|\BeatSwitch\Lock\Resources\Resource|null $resource
-     * @param int|null $resourceId
+     * @param string|null $resourceId
      * @return \BeatSwitch\Lock\Resources\Resource
      */
     protected function convertResourceToObject($resource, $resourceId = null)

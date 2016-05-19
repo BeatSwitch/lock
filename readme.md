@@ -549,7 +549,7 @@ Checks to see if the current caller has permission to do something.
 can(
     string|array $action,
     string|\BeatSwitch\Lock\Resources\Resource $resource = null,
-    int $resourceId = null
+    string $resourceId = null
 )
 ```
 
@@ -561,7 +561,7 @@ Checks to see if it's forbidden for the current caller to do something.
 cannot(
     string|array $action,
     string|\BeatSwitch\Lock\Resources\Resource $resource = null,
-    int $resourceId = null
+    string $resourceId = null
 )
 ```
 
@@ -573,7 +573,7 @@ Sets a `Privilege` permission on a caller to allow it to do something. Removes a
 allow(
     string|array $action,
     string|\BeatSwitch\Lock\Resources\Resource $resource = null,
-    int $resourceId = null,
+    string $resourceId = null,
     \BeatSwitch\Lock\Permissions\Condition[] $conditions = []
 )
 ```
@@ -586,7 +586,7 @@ Sets a `Restriction` permission on a caller to prevent it from doing something. 
 deny(
     string|array $action,
     string|\BeatSwitch\Lock\Resources\Resource $resource = null,
-    int $resourceId = null,
+    string $resourceId = null,
     \BeatSwitch\Lock\Permissions\Condition[] $conditions = []
 )
 ```
@@ -599,7 +599,7 @@ Toggles the value for the given permission.
 toggle(
     string|array $action,
     string|\BeatSwitch\Lock\Resources\Resource $resource = null,
-    int $resourceId = null
+    string $resourceId = null
 )
 ```
 
@@ -702,7 +702,7 @@ We'll assume we have a `CallerPermission` model class with at least the followin
 - `type` (varchar, 10)
 - `action` (varchar, 100)
 - `resource_type` (varchar, 100, nullable)
-- `resource_id` (int, 11, nullable)
+- `resource_id` (varchar, 36, nullable)
 
 And we have a `RolePermission` model with the following database columns:
 
@@ -710,7 +710,7 @@ And we have a `RolePermission` model with the following database columns:
 - `type` (varchar, 10)
 - `action` (varchar, 100)
 - `resource_type` (varchar, 100, nullable)
-- `resource_id` (int, 11, nullable)
+- `resource_id` (varchar, 36, nullable)
 
 Let's check out a full implementation of the driver below. Notice that for the `getCallerPermissions` method we're using the `PermissionFactory` class to easily map the data and create `Permission` objects from them. The `PermissionFactory`'s `createFromData` method will accept both arrays and objects.
 

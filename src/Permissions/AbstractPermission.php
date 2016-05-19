@@ -177,7 +177,7 @@ abstract class AbstractPermission implements Permission
     /**
      * The resource's identifier
      *
-     * @return int|null
+     * @return string|null
      */
     public function getResourceId()
     {
