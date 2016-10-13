@@ -306,6 +306,7 @@ abstract class Lock
             $denied[$action] = [];
             $allowedOnCallerLevel[$action] = [];
             $deniedOnCallerLevel[$action] = [];
+            $allowedOnRoleLevel[$action] = [];
             $deniedOnRoleLevel[$action] = [];
 
             // browse permission of a role / caller
