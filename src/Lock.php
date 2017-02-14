@@ -40,7 +40,7 @@ abstract class Lock
             }
         }
 
-        return true;
+        return false;
     }
 
     /**
