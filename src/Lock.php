@@ -277,7 +277,7 @@ abstract class Lock
      *
      * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
-    abstract protected function getPermissions();
+    abstract public function getPermissions();
 
     /**
      * Stores a permission into the driver

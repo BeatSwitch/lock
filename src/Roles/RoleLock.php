@@ -49,7 +49,7 @@ class RoleLock extends Lock
      *
      * @return \BeatSwitch\Lock\Permissions\Permission[]
      */
-    protected function getPermissions()
+    public function getPermissions()
     {
         return $this->getPermissionsForRole($this->role);
     }
